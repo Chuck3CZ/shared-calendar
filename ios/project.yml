@@ -15,10 +15,6 @@ targets:
       path: SharedCalendar/Info.plist
       properties:
         UILaunchScreen: {}
-        NSAppTransportSecurity:
-          NSExceptionDomains:
-            localhost:
-              NSExceptionAllowsInsecureHTTPLoads: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: cz.gabrhelovi.sharedcalendar

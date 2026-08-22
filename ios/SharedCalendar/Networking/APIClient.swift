@@ -8,11 +8,7 @@ enum APIError: Error {
 final class APIClient {
     static let shared = APIClient()
 
-#if DEBUG
-    var baseURL = URL(string: "http://localhost:3000")!
-#else
     var baseURL = URL(string: "https://sc.gabrhelovi.cz")!
-#endif
 
     private let decoder: JSONDecoder = {
         let decoder = JSONDecoder()
@@ -22,8 +18,12 @@ final class APIClient {
 
     private let encoder = JSONEncoder()
 
-    private func request(_ path: String, method: String = "GET", body: Data? = nil, authenticated: Bool = false) async throws -> Data {
-        var request = URLRequest(url: baseURL.appendingPathComponent(path))
+    private func request(_ path: String, queryItems: [URLQueryItem] = [], method: String = "GET", body: Data? = nil, authenticated: Bool = false) async throws -> Data {
+        var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: true)!
+        if !queryItems.isEmpty {
+            components.queryItems = queryItems
+        }
+        var request = URLRequest(url: components.url!)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         if authenticated {
@@ -42,8 +42,11 @@ final class APIClient {
 
     func fetchEvents(from: Date, to: Date) async throws -> [Event] {
         let formatter = ISO8601DateFormatter()
-        let path = "events?from=\(formatter.string(from: from))&to=\(formatter.string(from: to))"
-        let data = try await request(path)
+        let queryItems = [
+            URLQueryItem(name: "from", value: formatter.string(from: from)),
+            URLQueryItem(name: "to", value: formatter.string(from: to)),
+        ]
+        let data = try await request("events", queryItems: queryItems)
         return try decoder.decode([Event].self, from: data)
     }
 
