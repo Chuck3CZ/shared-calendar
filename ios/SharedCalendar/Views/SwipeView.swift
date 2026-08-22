@@ -7,28 +7,41 @@ struct SwipeView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                if let errorMessage {
-                    Text(errorMessage).foregroundStyle(.red).padding()
-                } else if pending.isEmpty {
-                    ContentUnavailableView(
-                        "Žádné nové akce",
-                        systemImage: "checkmark.circle",
-                        description: Text("Všechno máš probrané")
-                    )
-                } else {
-                    ForEach(Array(pending.enumerated().reversed()), id: \.element.id) { index, event in
-                        SwipeCard(event: event) { status in
-                            respond(to: event, status: status)
+            ScrollView {
+                ZStack {
+                    if let errorMessage {
+                        Text(errorMessage).foregroundStyle(.red).padding()
+                    } else if pending.isEmpty {
+                        ContentUnavailableView(
+                            "Žádné nové akce",
+                            systemImage: "checkmark.circle",
+                            description: Text("Všechno máš probrané")
+                        )
+                    } else {
+                        ForEach(Array(pending.enumerated().reversed()), id: \.element.id) { index, event in
+                            SwipeCard(event: event) { status in
+                                respond(to: event, status: status)
+                            }
+                            .zIndex(Double(index))
+                            .allowsHitTesting(index == pending.count - 1)
                         }
-                        .zIndex(Double(index))
-                        .allowsHitTesting(index == pending.count - 1)
+                    }
+                }
+                .padding()
+                .frame(height: 480)
+            }
+            .navigationTitle("Nové akce")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        Task { await load() }
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
                     }
                 }
             }
-            .padding()
-            .navigationTitle("Nové akce")
-            .task { await load() }
+            .refreshable { await load() }
+            .onAppear { Task { await load() } }
         }
     }
 
