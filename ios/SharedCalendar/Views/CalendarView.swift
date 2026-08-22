@@ -31,9 +31,9 @@ struct CalendarView: View {
                         Text("Žádné akce tento den").foregroundStyle(.secondary)
                     } else {
                         ForEach(eventsForSelectedDay) { event in
-                            let isMine = auth.session?.profile.id == event.ownerId
+                            let canOpen = auth.session?.profile.id == event.ownerId || auth.session?.profile.role == "admin"
                             Button {
-                                if isMine { detailEvent = event }
+                                if canOpen { detailEvent = event }
                             } label: {
                                 HStack {
                                     VStack(alignment: .leading, spacing: 4) {
@@ -45,7 +45,7 @@ struct CalendarView: View {
                                             Text(location).font(.caption).foregroundStyle(.secondary)
                                         }
                                     }
-                                    if isMine {
+                                    if canOpen {
                                         Spacer()
                                         Image(systemName: "chevron.right")
                                             .font(.caption)
@@ -121,11 +121,15 @@ private struct EventDetailView: View {
     let onEdit: () -> Void
     let onDeleted: () -> Void
 
+    @ObservedObject private var auth = AuthManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var showingDeleteConfirm = false
     @State private var showingSlideToDelete = false
     @State private var isDeleting = false
     @State private var errorMessage: String?
+
+    private var isOwner: Bool { auth.session?.profile.id == event.ownerId }
+    private var isAdmin: Bool { auth.session?.profile.role == "admin" }
 
     var body: some View {
         NavigationStack {
@@ -139,6 +143,7 @@ private struct EventDetailView: View {
                         LabeledContent("Místo", value: location)
                     }
                     LabeledContent("Kdy", value: event.startAt.formatted(date: .abbreviated, time: .shortened))
+                    LabeledContent("Autor", value: isOwner ? "Ty" : (event.ownerName ?? "Neznámé jméno"))
                 }
 
                 if let errorMessage {
@@ -157,9 +162,13 @@ private struct EventDetailView: View {
                     }
                 } else {
                     Section {
-                        Button("Upravit") { onEdit() }
-                        Button("Smazat", role: .destructive) {
-                            showingDeleteConfirm = true
+                        if isOwner {
+                            Button("Upravit") { onEdit() }
+                        }
+                        if isOwner || isAdmin {
+                            Button("Smazat", role: .destructive) {
+                                showingDeleteConfirm = true
+                            }
                         }
                     }
                 }

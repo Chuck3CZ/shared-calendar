@@ -23,8 +23,10 @@ const updateEvent = db.prepare(`
   WHERE id = ? AND owner_id = ?
 `);
 
+// Permission (owner or admin) is checked in the route handler; this just
+// applies the delete once that's settled.
 const softDeleteEvent = db.prepare(`
-  UPDATE events SET deleted_at = datetime('now') WHERE id = ? AND owner_id = ?
+  UPDATE events SET deleted_at = datetime('now') WHERE id = ?
 `);
 
 const getEvent = db.prepare("SELECT * FROM events WHERE id = ?");
@@ -145,16 +147,17 @@ eventsRouter.patch("/:id", requireUser, (req, res) => {
   res.json(getEvent.get(event.id));
 });
 
-// DELETE /events/:id — move an event you own to the trash (soft delete)
+// DELETE /events/:id — move an event to the trash (soft delete). Owners can
+// delete their own; admins can moderate anyone's.
 eventsRouter.delete("/:id", requireUser, (req, res) => {
   const event = getEvent.get(req.params.id);
   if (!event || event.deleted_at) {
     return res.status(404).json({ error: "event not found" });
   }
-  if (event.owner_id !== req.user.id) {
+  if (event.owner_id !== req.user.id && req.user.role !== "admin") {
     return res.status(403).json({ error: "you can only delete your own events" });
   }
 
-  softDeleteEvent.run(event.id, req.user.id);
+  softDeleteEvent.run(event.id);
   res.json({ event_id: event.id, deleted: true });
 });

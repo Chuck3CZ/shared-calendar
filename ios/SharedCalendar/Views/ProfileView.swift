@@ -44,10 +44,14 @@ struct ProfileView: View {
 
     private var signedInContent: some View {
         List {
-            Section("Účet") {
+            Section {
                 LabeledContent("Jméno", value: profile?.displayName ?? "—")
                 LabeledContent("Role", value: roleLabel)
                 Button("Odhlásit se", role: .destructive) { auth.signOut() }
+            } footer: {
+                if profile?.displayName == nil {
+                    Text("Apple posílá jméno appce jen při úplně prvním přihlášení. Pokud chybí, odhlas se, v Nastavení telefonu (Apple ID → Přihlášení a zabezpečení → Aplikace používající Apple ID) u téhle appky zruš přístup a přihlas se znovu — příště už jméno pošle.")
+                }
             }
 
             if profile?.role != "admin" {

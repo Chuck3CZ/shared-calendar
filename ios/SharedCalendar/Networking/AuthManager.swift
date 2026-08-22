@@ -33,6 +33,11 @@ final class AuthManager: ObservableObject {
     /// request got approved) and keeps the Keychain copy in sync.
     func refreshProfile() async {
         guard let current = session, let profile = try? await APIClient.shared.fetchMe() else { return }
+        apply(profile)
+    }
+
+    private func apply(_ profile: UserProfile) {
+        guard let current = session else { return }
         let updated = SessionInfo(token: current.token, profile: profile)
         guard updated != current else { return }
         KeychainSession.save(updated)
