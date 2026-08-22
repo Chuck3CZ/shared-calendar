@@ -11,7 +11,9 @@ final class AuthManager: ObservableObject {
     private init() {
         session = KeychainSession.load()
         NotificationCenter.default.addObserver(forName: .sessionExpired, object: nil, queue: .main) { [weak self] _ in
-            self?.signOut()
+            Task { @MainActor in
+                self?.signOut()
+            }
         }
     }
 
