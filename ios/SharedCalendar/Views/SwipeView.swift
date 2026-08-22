@@ -4,7 +4,7 @@ struct SwipeView: View {
     @State private var pending: [Event] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
-    @State private var isReviewingAll = false
+    @State private var isShowingReviewBanner = false
     @AppStorage("viewAsMember") private var viewAsMember = false
 
     var body: some View {
@@ -16,7 +16,7 @@ struct SwipeView: View {
                         .foregroundStyle(.secondary)
                         .padding(.top, 4)
                 }
-                if isReviewingAll {
+                if isShowingReviewBanner {
                     Text("Znovu procházíš všechny akce – nové rozhodnutí přepíše to staré")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -48,8 +48,7 @@ struct SwipeView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
-                        isReviewingAll = true
-                        Task { await load() }
+                        Task { await loadReviewAll() }
                     } label: {
                         Image(systemName: "arrow.uturn.backward.circle")
                     }
@@ -57,7 +56,6 @@ struct SwipeView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        isReviewingAll = false
                         Task { await load() }
                     } label: {
                         Image(systemName: "arrow.clockwise")
@@ -71,13 +69,29 @@ struct SwipeView: View {
         }
     }
 
+    /// Normal queue: only events not yet responded to. This is the default
+    /// for every implicit reload (tab switch, pull-to-refresh, the refresh
+    /// button) so "review everything again" never comes back on its own.
     private func load() async {
         isLoading = true
         defer { isLoading = false }
+        isShowingReviewBanner = false
         do {
-            pending = isReviewingAll
-                ? try await APIClient.shared.fetchReview(viewAsMember: viewAsMember)
-                : try await APIClient.shared.fetchPending(viewAsMember: viewAsMember)
+            pending = try await APIClient.shared.fetchPending(viewAsMember: viewAsMember)
+            errorMessage = nil
+        } catch {
+            errorMessage = "Nepodařilo se načíst akce: \(error.localizedDescription)"
+        }
+    }
+
+    /// One-off action from the dedicated toolbar button: pulls in every
+    /// event, including already-decided ones, so they can be re-swiped.
+    private func loadReviewAll() async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            pending = try await APIClient.shared.fetchReview(viewAsMember: viewAsMember)
+            isShowingReviewBanner = true
             errorMessage = nil
         } catch {
             errorMessage = "Nepodařilo se načíst akce: \(error.localizedDescription)"
