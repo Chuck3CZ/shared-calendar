@@ -13,7 +13,6 @@
 		44A7CE0D23C68727A64033E6 /* NewEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A99B608CAAC941ABFB426701 /* NewEventView.swift */; };
 		56E3E97CD2CCD80E009859C0 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C37E27D983281FBBF91DAA4B /* CalendarView.swift */; };
 		5CAA8D645AE67F7BE1DAEE7F /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31C8451C2EAD245E8A38B3F6 /* ProfileView.swift */; };
-		61EA9CAABE84227EB803EE99 /* SignInDebugLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D6F392343027843F2F8697E /* SignInDebugLog.swift */; };
 		6E8FB7A4395DEACEE31652A0 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B203EF495E74B7A751A0E592 /* AuthManager.swift */; };
 		8991F35FB830C33D6315B0E8 /* KeychainSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FEEA6E4E83F1460F4581A23 /* KeychainSession.swift */; };
 		A810425834DA17BAB893E65F /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA24C6C582D3AB311CEB227 /* Event.swift */; };
@@ -26,7 +25,6 @@
 		2A3CC29F4020D076D58FE4B4 /* SharedCalendar.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SharedCalendar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		31C8451C2EAD245E8A38B3F6 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		6B9A70E0AE36C2EE3ECA676B /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
-		8D6F392343027843F2F8697E /* SignInDebugLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInDebugLog.swift; sourceTree = "<group>"; };
 		92783EC1CEE72B6A13D18EBE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9907B5FDD9F5BB072AA56D2A /* SharedCalendarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCalendarApp.swift; sourceTree = "<group>"; };
 		9A5D6AD1C0FAF961018BA7C5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -88,7 +86,6 @@
 				6B9A70E0AE36C2EE3ECA676B /* APIClient.swift */,
 				B203EF495E74B7A751A0E592 /* AuthManager.swift */,
 				9FEEA6E4E83F1460F4581A23 /* KeychainSession.swift */,
-				8D6F392343027843F2F8697E /* SignInDebugLog.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -173,7 +170,6 @@
 				44A7CE0D23C68727A64033E6 /* NewEventView.swift in Sources */,
 				5CAA8D645AE67F7BE1DAEE7F /* ProfileView.swift in Sources */,
 				FB873270DC3F7E821943C228 /* SharedCalendarApp.swift in Sources */,
-				61EA9CAABE84227EB803EE99 /* SignInDebugLog.swift in Sources */,
 				05642034B9444B65D43CEF2A /* SignInPromptView.swift in Sources */,
 				0BA6A6EECEE8BDD27D2F9AB4 /* SwipeView.swift in Sources */,
 			);

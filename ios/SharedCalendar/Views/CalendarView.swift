@@ -31,9 +31,8 @@ struct CalendarView: View {
                         Text("Žádné akce tento den").foregroundStyle(.secondary)
                     } else {
                         ForEach(eventsForSelectedDay) { event in
-                            let canOpen = auth.session?.profile.id == event.ownerId || auth.session?.profile.role == "admin"
                             Button {
-                                if canOpen { detailEvent = event }
+                                detailEvent = event
                             } label: {
                                 HStack {
                                     VStack(alignment: .leading, spacing: 4) {
@@ -45,12 +44,10 @@ struct CalendarView: View {
                                             Text(location).font(.caption).foregroundStyle(.secondary)
                                         }
                                     }
-                                    if canOpen {
-                                        Spacer()
-                                        Image(systemName: "chevron.right")
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
                                 }
                                 .contentShape(Rectangle())
                             }
