@@ -84,6 +84,7 @@ struct NewEventView: View {
             errorMessage = nil
             didSubmit = true
         } catch {
+            guard !error.isCancellation else { return }
             errorMessage = "Nepodařilo se uložit akci: \(error.localizedDescription)"
         }
     }

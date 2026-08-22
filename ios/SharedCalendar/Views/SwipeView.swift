@@ -80,6 +80,7 @@ struct SwipeView: View {
             pending = try await APIClient.shared.fetchPending(viewAsMember: viewAsMember)
             errorMessage = nil
         } catch {
+            guard !error.isCancellation else { return }
             errorMessage = "Nepodařilo se načíst akce: \(error.localizedDescription)"
         }
     }
@@ -94,6 +95,7 @@ struct SwipeView: View {
             isShowingReviewBanner = true
             errorMessage = nil
         } catch {
+            guard !error.isCancellation else { return }
             errorMessage = "Nepodařilo se načíst akce: \(error.localizedDescription)"
         }
     }

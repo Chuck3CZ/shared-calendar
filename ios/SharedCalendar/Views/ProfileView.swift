@@ -104,6 +104,7 @@ struct ProfileView: View {
             responses = try await responsesTask
             errorMessage = nil
         } catch {
+            guard !error.isCancellation else { return }
             errorMessage = "Nepodařilo se načíst profil: \(error.localizedDescription)"
         }
     }

@@ -113,6 +113,7 @@ struct CalendarView: View {
             events = try await APIClient.shared.fetchEvents(from: from, to: to)
             errorMessage = nil
         } catch {
+            guard !error.isCancellation else { return }
             errorMessage = "Nepodařilo se načíst akce: \(error.localizedDescription)"
         }
     }
@@ -191,6 +192,7 @@ private struct EventDetailView: View {
             onDeleted()
             dismiss()
         } catch {
+            guard !error.isCancellation else { return }
             errorMessage = "Nepodařilo se smazat akci: \(error.localizedDescription)"
             withAnimation { showingSlideToDelete = false }
         }

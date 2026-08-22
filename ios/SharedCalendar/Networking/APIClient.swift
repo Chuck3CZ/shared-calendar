@@ -5,6 +5,17 @@ enum APIError: Error {
     case invalidResponse
 }
 
+extension Error {
+    /// True when this error is just a superseded/cancelled request (e.g. an
+    /// incomplete pull-to-refresh gesture, or a reload triggered again before
+    /// the previous one finished) rather than a real failure worth showing.
+    var isCancellation: Bool {
+        if self is CancellationError { return true }
+        if let urlError = self as? URLError, urlError.code == .cancelled { return true }
+        return false
+    }
+}
+
 final class APIClient {
     static let shared = APIClient()
 
