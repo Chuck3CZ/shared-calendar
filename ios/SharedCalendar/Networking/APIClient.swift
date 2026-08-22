@@ -8,8 +8,11 @@ enum APIError: Error {
 final class APIClient {
     static let shared = APIClient()
 
-    /// Change to your Cloudflare Tunnel / NAS URL once deployed.
+#if DEBUG
     var baseURL = URL(string: "http://localhost:3000")!
+#else
+    var baseURL = URL(string: "https://sc.gabrhelovi.cz")!
+#endif
 
     private let decoder: JSONDecoder = {
         let decoder = JSONDecoder()

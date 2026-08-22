@@ -3,6 +3,13 @@ services:
     build: .
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "4000:3000"
     volumes:
       - ./data:/data
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - backend

@@ -16,7 +16,9 @@ targets:
       properties:
         UILaunchScreen: {}
         NSAppTransportSecurity:
-          NSAllowsArbitraryLoads: true
+          NSExceptionDomains:
+            localhost:
+              NSExceptionAllowsInsecureHTTPLoads: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: cz.gabrhelovi.sharedcalendar
