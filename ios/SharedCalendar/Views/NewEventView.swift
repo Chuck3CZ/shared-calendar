@@ -35,6 +35,14 @@ struct NewEventView: View {
                     }
                     .disabled(title.isEmpty || isSubmitting)
                 }
+
+                Section("Ladění") {
+                    LabeledContent("Client ID") {
+                        Text(ClientIdentity.current)
+                            .font(.caption)
+                            .textSelection(.enabled)
+                    }
+                }
             }
             .navigationTitle("Nová akce")
             .alert("Akce vytvořena", isPresented: $didSubmit) {
