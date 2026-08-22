@@ -4,6 +4,7 @@ struct SwipeView: View {
     @State private var pending: [Event] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @AppStorage("viewAsMember") private var viewAsMember = false
 
     var body: some View {
         NavigationStack {
@@ -42,6 +43,7 @@ struct SwipeView: View {
             }
             .refreshable { await load() }
             .onAppear { Task { await load() } }
+            .onChange(of: viewAsMember) { Task { await load() } }
         }
     }
 
@@ -49,7 +51,7 @@ struct SwipeView: View {
         isLoading = true
         defer { isLoading = false }
         do {
-            pending = try await APIClient.shared.fetchPending()
+            pending = try await APIClient.shared.fetchPending(viewAsMember: viewAsMember)
             errorMessage = nil
         } catch {
             errorMessage = "Nepodařilo se načíst akce: \(error.localizedDescription)"

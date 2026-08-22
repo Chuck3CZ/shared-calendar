@@ -45,7 +45,11 @@ eventsRouter.get("/", (req, res) => {
 
 // GET /events/pending — cards not yet swiped by the current user
 eventsRouter.get("/pending", requireUser, (req, res) => {
-  res.json(listPendingForUser.all(req.user.id, req.user.id, req.user.role));
+  // Admins can temporarily test the app as a regular member without a
+  // second account — the client sends this header, nothing is persisted.
+  const viewAsMember = req.header("X-View-As") === "member";
+  const effectiveRole = viewAsMember ? "basic" : req.user.role;
+  res.json(listPendingForUser.all(req.user.id, req.user.id, effectiveRole));
 });
 
 // POST /events — create an event (requires identity)

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -11,6 +11,7 @@
 		330F328FB34F0B9B868E8218 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5D6AD1C0FAF961018BA7C5 /* ContentView.swift */; };
 		44A7CE0D23C68727A64033E6 /* NewEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A99B608CAAC941ABFB426701 /* NewEventView.swift */; };
 		56E3E97CD2CCD80E009859C0 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C37E27D983281FBBF91DAA4B /* CalendarView.swift */; };
+		5CAA8D645AE67F7BE1DAEE7F /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31C8451C2EAD245E8A38B3F6 /* ProfileView.swift */; };
 		A810425834DA17BAB893E65F /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA24C6C582D3AB311CEB227 /* Event.swift */; };
 		B0CBC9B92BC27912CA021116 /* ClientIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73E25EECEF285D7BBB1FDE14 /* ClientIdentity.swift */; };
 		FB873270DC3F7E821943C228 /* SharedCalendarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9907B5FDD9F5BB072AA56D2A /* SharedCalendarApp.swift */; };
@@ -19,7 +20,8 @@
 
 /* Begin PBXFileReference section */
 		1FC0097D4083EA6FECA627E7 /* SwipeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeView.swift; sourceTree = "<group>"; };
-		2A3CC29F4020D076D58FE4B4 /* SharedCalendar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SharedCalendar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2A3CC29F4020D076D58FE4B4 /* SharedCalendar.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SharedCalendar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		31C8451C2EAD245E8A38B3F6 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		6B9A70E0AE36C2EE3ECA676B /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		73E25EECEF285D7BBB1FDE14 /* ClientIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientIdentity.swift; sourceTree = "<group>"; };
 		92783EC1CEE72B6A13D18EBE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -48,6 +50,7 @@
 			children = (
 				C37E27D983281FBBF91DAA4B /* CalendarView.swift */,
 				A99B608CAAC941ABFB426701 /* NewEventView.swift */,
+				31C8451C2EAD245E8A38B3F6 /* ProfileView.swift */,
 				1FC0097D4083EA6FECA627E7 /* SwipeView.swift */,
 			);
 			path = Views;
@@ -123,6 +126,8 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+				};
 			};
 			buildConfigurationList = 85798806A3CA8C01E2AE6640 /* Build configuration list for PBXProject "SharedCalendar" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -134,6 +139,7 @@
 			);
 			mainGroup = 6E8767B7FAFB407C40AA7EE3;
 			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 54;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -153,6 +159,7 @@
 				330F328FB34F0B9B868E8218 /* ContentView.swift in Sources */,
 				A810425834DA17BAB893E65F /* Event.swift in Sources */,
 				44A7CE0D23C68727A64033E6 /* NewEventView.swift in Sources */,
+				5CAA8D645AE67F7BE1DAEE7F /* ProfileView.swift in Sources */,
 				FB873270DC3F7E821943C228 /* SharedCalendarApp.swift in Sources */,
 				0BA6A6EECEE8BDD27D2F9AB4 /* SwipeView.swift in Sources */,
 			);
@@ -166,7 +173,6 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = LT2EBE5TBV;
 				INFOPLIST_FILE = SharedCalendar/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -305,7 +311,6 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = LT2EBE5TBV;
 				INFOPLIST_FILE = SharedCalendar/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

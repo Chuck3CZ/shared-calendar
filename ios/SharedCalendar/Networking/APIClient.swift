@@ -18,7 +18,7 @@ final class APIClient {
 
     private let encoder = JSONEncoder()
 
-    private func request(_ path: String, queryItems: [URLQueryItem] = [], method: String = "GET", body: Data? = nil, authenticated: Bool = false) async throws -> Data {
+    private func request(_ path: String, queryItems: [URLQueryItem] = [], method: String = "GET", body: Data? = nil, authenticated: Bool = false, extraHeaders: [String: String] = [:]) async throws -> Data {
         var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: true)!
         if !queryItems.isEmpty {
             components.queryItems = queryItems
@@ -28,6 +28,9 @@ final class APIClient {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         if authenticated {
             request.setValue(ClientIdentity.current, forHTTPHeaderField: "X-Client-Id")
+        }
+        for (field, value) in extraHeaders {
+            request.setValue(value, forHTTPHeaderField: field)
         }
         request.httpBody = body
 
@@ -50,9 +53,25 @@ final class APIClient {
         return try decoder.decode([Event].self, from: data)
     }
 
-    func fetchPending() async throws -> [Event] {
-        let data = try await request("events/pending", authenticated: true)
+    func fetchPending(viewAsMember: Bool = false) async throws -> [Event] {
+        let headers = viewAsMember ? ["X-View-As": "member"] : [:]
+        let data = try await request("events/pending", authenticated: true, extraHeaders: headers)
         return try decoder.decode([Event].self, from: data)
+    }
+
+    func fetchMe() async throws -> UserProfile {
+        let data = try await request("me", authenticated: true)
+        return try decoder.decode(UserProfile.self, from: data)
+    }
+
+    func fetchCreatedByMe() async throws -> [Event] {
+        let data = try await request("me/created", authenticated: true)
+        return try decoder.decode([Event].self, from: data)
+    }
+
+    func fetchMyResponses() async throws -> [RespondedEvent] {
+        let data = try await request("me/responses", authenticated: true)
+        return try decoder.decode([RespondedEvent].self, from: data)
     }
 
     func createEvent(_ payload: NewEventPayload) async throws -> Event {

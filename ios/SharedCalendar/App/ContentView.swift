@@ -11,6 +11,9 @@ struct ContentView: View {
 
             NewEventView()
                 .tabItem { Label("Přidat", systemImage: "plus.circle") }
+
+            ProfileView()
+                .tabItem { Label("Profil", systemImage: "person.circle") }
         }
     }
 }
