@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct NewEventView: View {
+    @Environment(\.dismiss) private var dismiss
     @State private var title = ""
     @State private var description = ""
     @State private var location = ""
@@ -37,8 +38,13 @@ struct NewEventView: View {
                 }
             }
             .navigationTitle("Nová akce")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Zrušit") { dismiss() }
+                }
+            }
             .alert("Akce vytvořena", isPresented: $didSubmit) {
-                Button("OK") { reset() }
+                Button("OK") { dismiss() }
             }
         }
     }
@@ -61,13 +67,6 @@ struct NewEventView: View {
         } catch {
             errorMessage = "Nepodařilo se vytvořit akci: \(error.localizedDescription)"
         }
-    }
-
-    private func reset() {
-        title = ""
-        description = ""
-        location = ""
-        startAt = Date()
     }
 }
 

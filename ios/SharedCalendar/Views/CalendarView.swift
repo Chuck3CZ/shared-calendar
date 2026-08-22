@@ -5,6 +5,7 @@ struct CalendarView: View {
     @State private var events: [Event] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var showingNewEvent = false
 
     private var eventsForSelectedDay: [Event] {
         events
@@ -40,6 +41,21 @@ struct CalendarView: View {
                 }
             }
             .navigationTitle("Kalendář")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingNewEvent = true
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                    }
+                }
+            }
+            .sheet(isPresented: $showingNewEvent, onDismiss: {
+                Task { await load() }
+            }) {
+                NewEventView()
+            }
             .task { await load() }
             .refreshable { await load() }
         }

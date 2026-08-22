@@ -9,9 +9,6 @@ struct ContentView: View {
             SwipeView()
                 .tabItem { Label("Nové akce", systemImage: "rectangle.stack") }
 
-            NewEventView()
-                .tabItem { Label("Přidat", systemImage: "plus.circle") }
-
             ProfileView()
                 .tabItem { Label("Profil", systemImage: "person.circle") }
         }
