@@ -31,7 +31,7 @@ struct SwipeView: View {
                 .padding()
                 .frame(height: 480)
             }
-            .navigationTitle("Nové akce")
+            .navigationTitle("Objevuj")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {

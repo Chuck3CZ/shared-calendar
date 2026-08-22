@@ -7,7 +7,7 @@ struct ContentView: View {
                 .tabItem { Label("Kalendář", systemImage: "calendar") }
 
             SwipeView()
-                .tabItem { Label("Nové akce", systemImage: "rectangle.stack") }
+                .tabItem { Label("Objevuj", systemImage: "rectangle.stack") }
 
             ProfileView()
                 .tabItem { Label("Profil", systemImage: "person.circle") }
