@@ -54,6 +54,12 @@ struct ProfileView: View {
                 }
             }
 
+            if let debugInfo = SignInDebugLog.lastAppleNameCapture {
+                Section("Ladění posledního přihlášení") {
+                    Text(debugInfo).font(.caption2).textSelection(.enabled)
+                }
+            }
+
             if profile?.role != "admin" {
                 Section {
                     LabeledContent("Session token") {
