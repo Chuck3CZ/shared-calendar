@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct SwipeView: View {
+    @ObservedObject private var auth = AuthManager.shared
     @State private var pending: [Event] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
@@ -9,64 +10,74 @@ struct SwipeView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                if viewAsMember {
-                    Text("Testovací režim člena – swipnutí se nikam neukládá")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .padding(.top, 4)
+            Group {
+                if auth.isSignedIn {
+                    content
+                } else {
+                    SignInPromptView(message: "Přihlas se přes Apple, ať můžeš procházet a reagovat na akce.")
                 }
-                if isShowingReviewBanner {
-                    Text("Znovu procházíš všechny akce – nové rozhodnutí přepíše to staré")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .padding(.top, 4)
-                }
-                ZStack {
-                    if let errorMessage {
-                        Text(errorMessage).foregroundStyle(.red).padding()
-                    } else if pending.isEmpty {
-                        ContentUnavailableView(
-                            "Žádné nové akce",
-                            systemImage: "checkmark.circle",
-                            description: Text("Všechno máš probrané")
-                        )
-                    } else {
-                        ForEach(Array(pending.enumerated().reversed()), id: \.element.id) { index, event in
-                            SwipeCard(event: event) { status in
-                                respond(to: event, status: status)
-                            }
-                            .zIndex(Double(index))
-                            .allowsHitTesting(index == pending.count - 1)
-                        }
-                    }
-                }
-                .padding()
-                .frame(height: 480)
             }
             .navigationTitle("Objevuj")
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        Task { await loadReviewAll() }
-                    } label: {
-                        Image(systemName: "arrow.uturn.backward.circle")
+        }
+    }
+
+    private var content: some View {
+        ScrollView {
+            if viewAsMember {
+                Text("Testovací režim člena – swipnutí se nikam neukládá")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 4)
+            }
+            if isShowingReviewBanner {
+                Text("Znovu procházíš všechny akce – nové rozhodnutí přepíše to staré")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 4)
+            }
+            ZStack {
+                if let errorMessage {
+                    Text(errorMessage).foregroundStyle(.red).padding()
+                } else if pending.isEmpty {
+                    ContentUnavailableView(
+                        "Žádné nové akce",
+                        systemImage: "checkmark.circle",
+                        description: Text("Všechno máš probrané")
+                    )
+                } else {
+                    ForEach(Array(pending.enumerated().reversed()), id: \.element.id) { index, event in
+                        SwipeCard(event: event) { status in
+                            respond(to: event, status: status)
+                        }
+                        .zIndex(Double(index))
+                        .allowsHitTesting(index == pending.count - 1)
                     }
-                    .accessibilityLabel("Znovu prozkoumat všechny akce")
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        Task { await load() }
-                    } label: {
-                        Image(systemName: "arrow.clockwise")
-                    }
-                    .accessibilityLabel("Načíst nové akce")
                 }
             }
-            .refreshable { await load() }
-            .onAppear { Task { await load() } }
-            .onChange(of: viewAsMember) { Task { await load() } }
+            .padding()
+            .frame(height: 480)
         }
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    Task { await loadReviewAll() }
+                } label: {
+                    Image(systemName: "arrow.uturn.backward.circle")
+                }
+                .accessibilityLabel("Znovu prozkoumat všechny akce")
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    Task { await load() }
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                }
+                .accessibilityLabel("Načíst nové akce")
+            }
+        }
+        .refreshable { await load() }
+        .onAppear { Task { await load() } }
+        .onChange(of: viewAsMember) { Task { await load() } }
     }
 
     /// Normal queue: only events not yet responded to. This is the default

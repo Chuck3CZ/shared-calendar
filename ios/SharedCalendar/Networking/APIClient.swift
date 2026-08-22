@@ -3,6 +3,28 @@ import Foundation
 enum APIError: Error {
     case server(String)
     case invalidResponse
+    case notAuthenticated
+}
+
+extension APIError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .server(let message): return message
+        case .invalidResponse: return "Neplatná odpověď serveru."
+        case .notAuthenticated: return "Nejsi přihlášený."
+        }
+    }
+}
+
+private struct ServerErrorBody: Decodable {
+    let error: String?
+    let message: String?
+}
+
+extension Notification.Name {
+    /// Posted when a request comes back 401 with a session token attached,
+    /// meaning the server no longer recognizes it (revoked/expired).
+    static let sessionExpired = Notification.Name("sessionExpired")
 }
 
 extension Error {
@@ -38,7 +60,10 @@ final class APIClient {
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         if authenticated {
-            request.setValue(ClientIdentity.current, forHTTPHeaderField: "X-Client-Id")
+            guard let token = KeychainSession.load()?.token else {
+                throw APIError.notAuthenticated
+            }
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
         for (field, value) in extraHeaders {
             request.setValue(value, forHTTPHeaderField: field)
@@ -48,10 +73,51 @@ final class APIClient {
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw APIError.invalidResponse }
         guard (200..<300).contains(http.statusCode) else {
-            let message = String(data: data, encoding: .utf8) ?? "HTTP \(http.statusCode)"
+            if http.statusCode == 401 && authenticated {
+                NotificationCenter.default.post(name: .sessionExpired, object: nil)
+            }
+            let serverError = try? JSONDecoder().decode(ServerErrorBody.self, from: data)
+            let message = serverError?.message ?? serverError?.error
+                ?? String(data: data, encoding: .utf8) ?? "HTTP \(http.statusCode)"
             throw APIError.server(message)
         }
         return data
+    }
+
+    func authenticateWithApple(identityToken: String, fullName: String?) async throws -> AuthResponse {
+        struct Payload: Codable {
+            let identityToken: String
+            let fullName: String?
+        }
+        let body = try encoder.encode(Payload(identityToken: identityToken, fullName: fullName))
+        let data = try await request("auth/apple", method: "POST", body: body)
+        return try decoder.decode(AuthResponse.self, from: data)
+    }
+
+    func fetchVerificationStatus() async throws -> VerificationRequest? {
+        let data = try await request("me/verification-request", authenticated: true)
+        if data.isEmpty || String(data: data, encoding: .utf8) == "null" { return nil }
+        return try decoder.decode(VerificationRequest.self, from: data)
+    }
+
+    @discardableResult
+    func requestVerification(reason: String?) async throws -> VerificationRequest {
+        let body = try encoder.encode(["reason": reason])
+        let data = try await request("me/verification-request", method: "POST", body: body, authenticated: true)
+        return try decoder.decode(VerificationRequest.self, from: data)
+    }
+
+    func fetchPendingVerificationRequests() async throws -> [VerificationRequest] {
+        let data = try await request("admin/verification-requests", authenticated: true)
+        return try decoder.decode([VerificationRequest].self, from: data)
+    }
+
+    func approveVerificationRequest(id: String) async throws {
+        _ = try await request("admin/verification-requests/\(id)/approve", method: "POST", authenticated: true)
+    }
+
+    func rejectVerificationRequest(id: String) async throws {
+        _ = try await request("admin/verification-requests/\(id)/reject", method: "POST", authenticated: true)
     }
 
     func fetchEvents(from: Date, to: Date) async throws -> [Event] {

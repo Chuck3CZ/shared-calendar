@@ -7,13 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		05642034B9444B65D43CEF2A /* SignInPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9260C584F63129AF18F79EA /* SignInPromptView.swift */; };
 		0BA6A6EECEE8BDD27D2F9AB4 /* SwipeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FC0097D4083EA6FECA627E7 /* SwipeView.swift */; };
 		330F328FB34F0B9B868E8218 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5D6AD1C0FAF961018BA7C5 /* ContentView.swift */; };
 		44A7CE0D23C68727A64033E6 /* NewEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A99B608CAAC941ABFB426701 /* NewEventView.swift */; };
 		56E3E97CD2CCD80E009859C0 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C37E27D983281FBBF91DAA4B /* CalendarView.swift */; };
 		5CAA8D645AE67F7BE1DAEE7F /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31C8451C2EAD245E8A38B3F6 /* ProfileView.swift */; };
+		6E8FB7A4395DEACEE31652A0 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B203EF495E74B7A751A0E592 /* AuthManager.swift */; };
+		8991F35FB830C33D6315B0E8 /* KeychainSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FEEA6E4E83F1460F4581A23 /* KeychainSession.swift */; };
 		A810425834DA17BAB893E65F /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA24C6C582D3AB311CEB227 /* Event.swift */; };
-		B0CBC9B92BC27912CA021116 /* ClientIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73E25EECEF285D7BBB1FDE14 /* ClientIdentity.swift */; };
 		FB873270DC3F7E821943C228 /* SharedCalendarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9907B5FDD9F5BB072AA56D2A /* SharedCalendarApp.swift */; };
 		FE5AA009EA99810DA085D0AB /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B9A70E0AE36C2EE3ECA676B /* APIClient.swift */; };
 /* End PBXBuildFile section */
@@ -23,13 +25,16 @@
 		2A3CC29F4020D076D58FE4B4 /* SharedCalendar.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SharedCalendar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		31C8451C2EAD245E8A38B3F6 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		6B9A70E0AE36C2EE3ECA676B /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
-		73E25EECEF285D7BBB1FDE14 /* ClientIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientIdentity.swift; sourceTree = "<group>"; };
 		92783EC1CEE72B6A13D18EBE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9907B5FDD9F5BB072AA56D2A /* SharedCalendarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCalendarApp.swift; sourceTree = "<group>"; };
 		9A5D6AD1C0FAF961018BA7C5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		9FEEA6E4E83F1460F4581A23 /* KeychainSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainSession.swift; sourceTree = "<group>"; };
 		A99B608CAAC941ABFB426701 /* NewEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewEventView.swift; sourceTree = "<group>"; };
+		B203EF495E74B7A751A0E592 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
+		BBF14366458B05AAB7F3C725 /* SharedCalendar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SharedCalendar.entitlements; sourceTree = "<group>"; };
 		C37E27D983281FBBF91DAA4B /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		EDA24C6C582D3AB311CEB227 /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
+		F9260C584F63129AF18F79EA /* SignInPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInPromptView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -37,6 +42,7 @@
 			isa = PBXGroup;
 			children = (
 				92783EC1CEE72B6A13D18EBE /* Info.plist */,
+				BBF14366458B05AAB7F3C725 /* SharedCalendar.entitlements */,
 				A1C578C7D1FC9C63F58972F0 /* App */,
 				DADF828AF1271E9BF91F5740 /* Models */,
 				BE368672476F162625D4AF2D /* Networking */,
@@ -51,6 +57,7 @@
 				C37E27D983281FBBF91DAA4B /* CalendarView.swift */,
 				A99B608CAAC941ABFB426701 /* NewEventView.swift */,
 				31C8451C2EAD245E8A38B3F6 /* ProfileView.swift */,
+				F9260C584F63129AF18F79EA /* SignInPromptView.swift */,
 				1FC0097D4083EA6FECA627E7 /* SwipeView.swift */,
 			);
 			path = Views;
@@ -77,7 +84,8 @@
 			isa = PBXGroup;
 			children = (
 				6B9A70E0AE36C2EE3ECA676B /* APIClient.swift */,
-				73E25EECEF285D7BBB1FDE14 /* ClientIdentity.swift */,
+				B203EF495E74B7A751A0E592 /* AuthManager.swift */,
+				9FEEA6E4E83F1460F4581A23 /* KeychainSession.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -154,13 +162,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				FE5AA009EA99810DA085D0AB /* APIClient.swift in Sources */,
+				6E8FB7A4395DEACEE31652A0 /* AuthManager.swift in Sources */,
 				56E3E97CD2CCD80E009859C0 /* CalendarView.swift in Sources */,
-				B0CBC9B92BC27912CA021116 /* ClientIdentity.swift in Sources */,
 				330F328FB34F0B9B868E8218 /* ContentView.swift in Sources */,
 				A810425834DA17BAB893E65F /* Event.swift in Sources */,
+				8991F35FB830C33D6315B0E8 /* KeychainSession.swift in Sources */,
 				44A7CE0D23C68727A64033E6 /* NewEventView.swift in Sources */,
 				5CAA8D645AE67F7BE1DAEE7F /* ProfileView.swift in Sources */,
 				FB873270DC3F7E821943C228 /* SharedCalendarApp.swift in Sources */,
+				05642034B9444B65D43CEF2A /* SignInPromptView.swift in Sources */,
 				0BA6A6EECEE8BDD27D2F9AB4 /* SwipeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -172,6 +182,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = SharedCalendar/SharedCalendar.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = SharedCalendar/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -310,6 +321,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = SharedCalendar/SharedCalendar.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = SharedCalendar/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (

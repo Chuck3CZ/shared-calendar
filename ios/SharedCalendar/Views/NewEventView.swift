@@ -85,7 +85,11 @@ struct NewEventView: View {
             didSubmit = true
         } catch {
             guard !error.isCancellation else { return }
-            errorMessage = "Nepodařilo se uložit akci: \(error.localizedDescription)"
+            if case APIError.server(let message) = error {
+                errorMessage = message
+            } else {
+                errorMessage = "Nepodařilo se uložit akci: \(error.localizedDescription)"
+            }
         }
     }
 }

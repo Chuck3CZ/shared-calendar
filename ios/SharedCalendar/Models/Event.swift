@@ -34,10 +34,9 @@ struct EventResponse: Codable {
     }
 }
 
-struct UserProfile: Codable {
+struct UserProfile: Codable, Equatable {
     let id: String
     let appleUserId: String?
-    let clientId: String?
     let displayName: String?
     let role: String
     let createdAt: String
@@ -45,10 +44,32 @@ struct UserProfile: Codable {
     enum CodingKeys: String, CodingKey {
         case id
         case appleUserId = "apple_user_id"
-        case clientId = "client_id"
         case displayName = "display_name"
         case role
         case createdAt = "created_at"
+    }
+}
+
+struct AuthResponse: Codable {
+    let token: String
+    let user: UserProfile
+}
+
+struct VerificationRequest: Codable, Identifiable {
+    let id: String
+    let userId: String
+    let reason: String?
+    let status: String
+    let createdAt: String
+    let userDisplayName: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userId = "user_id"
+        case reason
+        case status
+        case createdAt = "created_at"
+        case userDisplayName = "user_display_name"
     }
 }
 

@@ -15,6 +15,11 @@ targets:
       path: SharedCalendar/Info.plist
       properties:
         UILaunchScreen: {}
+    entitlements:
+      path: SharedCalendar/SharedCalendar.entitlements
+      properties:
+        com.apple.developer.applesignin:
+          - Default
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: cz.gabrhelovi.sharedcalendar

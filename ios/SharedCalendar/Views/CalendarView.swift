@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct CalendarView: View {
+    @ObservedObject private var auth = AuthManager.shared
     @State private var selectedDate = Date()
     @State private var events: [Event] = []
     @State private var isLoading = false
@@ -8,7 +9,6 @@ struct CalendarView: View {
     @State private var showingNewEvent = false
     @State private var editingEvent: Event?
     @State private var detailEvent: Event?
-    @State private var myProfile: UserProfile?
     @AppStorage("viewAsMember") private var viewAsMember = false
 
     private var eventsForSelectedDay: [Event] {
@@ -31,7 +31,7 @@ struct CalendarView: View {
                         Text("Žádné akce tento den").foregroundStyle(.secondary)
                     } else {
                         ForEach(eventsForSelectedDay) { event in
-                            let isMine = myProfile != nil && myProfile?.id == event.ownerId
+                            let isMine = auth.session?.profile.id == event.ownerId
                             Button {
                                 if isMine { detailEvent = event }
                             } label: {
@@ -62,7 +62,7 @@ struct CalendarView: View {
             }
             .navigationTitle("Kalendář")
             .toolbar {
-                if !viewAsMember {
+                if auth.isSignedIn && !viewAsMember {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
                             showingNewEvent = true
@@ -95,10 +95,7 @@ struct CalendarView: View {
                     }
                 )
             }
-            .task {
-                await load()
-                myProfile = try? await APIClient.shared.fetchMe()
-            }
+            .task { await load() }
             .refreshable { await load() }
         }
     }

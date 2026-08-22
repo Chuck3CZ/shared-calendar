@@ -6,6 +6,7 @@ services:
       - "4000:3000"
     environment:
       - ADMIN_BOOTSTRAP_SECRET=${ADMIN_BOOTSTRAP_SECRET}
+      - APPLE_BUNDLE_ID=${APPLE_BUNDLE_ID}
     volumes:
       - ./data:/data
 

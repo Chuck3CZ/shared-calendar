@@ -1,12 +1,16 @@
 import SwiftUI
 
 struct ProfileView: View {
-    @State private var profile: UserProfile?
+    @ObservedObject private var auth = AuthManager.shared
     @State private var created: [Event] = []
     @State private var responses: [RespondedEvent] = []
+    @State private var verificationStatus: VerificationRequest?
+    @State private var pendingRequests: [VerificationRequest] = []
+    @State private var verificationReason = ""
     @State private var errorMessage: String?
     @AppStorage("viewAsMember") private var viewAsMember = false
 
+    private var profile: UserProfile? { auth.session?.profile }
     private var accepted: [RespondedEvent] { responses.filter { $0.status == "accepted" } }
     private var rejected: [RespondedEvent] { responses.filter { $0.status == "rejected" } }
 
@@ -27,85 +31,182 @@ struct ProfileView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                Section("Účet") {
-                    LabeledContent("Role", value: roleLabel)
-                    LabeledContent("Client ID") {
-                        Text(profile?.clientId ?? ClientIdentity.current)
-                            .font(.caption)
-                            .textSelection(.enabled)
-                    }
-                }
-
-                if profile?.role == "admin" {
-                    Section {
-                        Toggle("Testovat jako běžný uživatel", isOn: $viewAsMember)
-                    } footer: {
-                        Text("Dočasně tě to ve swipe okně vrátí do role základního uživatele, aniž bys musel přepínat účty.")
-                    }
-                }
-
-                Section("Vytvořeno mnou (\(created.count))") {
-                    if created.isEmpty {
-                        Text("Zatím žádné akce").foregroundStyle(.secondary)
-                    } else {
-                        ForEach(created) { event in
-                            VStack(alignment: .leading) {
-                                Text(event.title)
-                                Text(event.startAt.formatted(date: .abbreviated, time: .shortened))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                    }
-                }
-
-                Section("Zúčastním se (\(accepted.count))") {
-                    if accepted.isEmpty {
-                        Text("Zatím nic").foregroundStyle(.secondary)
-                    } else {
-                        ForEach(accepted) { event in
-                            Text(event.title)
-                        }
-                    }
-                }
-
-                Section("Nezúčastním se (\(rejected.count))") {
-                    if rejected.isEmpty {
-                        Text("Zatím nic").foregroundStyle(.secondary)
-                    } else {
-                        ForEach(rejected) { event in
-                            Text(event.title)
-                        }
-                    }
-                }
-
-                if let errorMessage {
-                    Text(errorMessage).foregroundStyle(.red)
-                }
-
-                Section {
-                    LabeledContent("Verze appky", value: appVersion)
+            Group {
+                if auth.isSignedIn {
+                    signedInContent
+                } else {
+                    SignInPromptView(message: "Přihlas se přes Apple, ať vidíš svůj profil a můžeš vytvářet akce.")
                 }
             }
             .navigationTitle("Profil")
-            .refreshable { await load() }
-            .onAppear { Task { await load() } }
         }
     }
 
+    private var signedInContent: some View {
+        List {
+            Section("Účet") {
+                LabeledContent("Jméno", value: profile?.displayName ?? "—")
+                LabeledContent("Role", value: roleLabel)
+                Button("Odhlásit se", role: .destructive) { auth.signOut() }
+            }
+
+            if profile?.role != "admin" {
+                Section {
+                    LabeledContent("Session token") {
+                        Text(auth.session?.token ?? "")
+                            .font(.caption2)
+                            .textSelection(.enabled)
+                    }
+                } footer: {
+                    Text("Jen pro první nastavení administrátora přes POST /admin/bootstrap. Až budeš admin, tahle sekce zmizí.")
+                }
+            }
+
+            if profile?.role == "admin" {
+                Section {
+                    Toggle("Testovat jako běžný uživatel", isOn: $viewAsMember)
+                } footer: {
+                    Text("Dočasně tě to ve swipe okně vrátí do role základního uživatele, aniž bys musel přepínat účty.")
+                }
+
+                Section("Žádosti o ověření (\(pendingRequests.count))") {
+                    if pendingRequests.isEmpty {
+                        Text("Žádné čekající žádosti").foregroundStyle(.secondary)
+                    } else {
+                        ForEach(pendingRequests) { request in
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(request.userDisplayName ?? "Bez jména").font(.headline)
+                                if let reason = request.reason, !reason.isEmpty {
+                                    Text(reason).font(.caption).foregroundStyle(.secondary)
+                                }
+                                HStack {
+                                    Button("Zamítnout", role: .destructive) {
+                                        Task { await reject(request) }
+                                    }
+                                    Spacer()
+                                    Button("Schválit") {
+                                        Task { await approve(request) }
+                                    }
+                                }
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
+                }
+            }
+
+            if profile?.role == "basic" {
+                Section {
+                    if verificationStatus?.status == "pending" {
+                        Text("Žádost čeká na schválení").foregroundStyle(.secondary)
+                    } else {
+                        TextField("Proč chceš ověřit (nepovinné)", text: $verificationReason)
+                        Button("Požádat o ověření") {
+                            Task { await requestVerification() }
+                        }
+                    }
+                } header: {
+                    Text("Ověření účtu")
+                } footer: {
+                    Text("Základní účet smí vytvořit nejvýš 2 akce za 14 dní. Ověření tenhle limit odstraní.")
+                }
+            }
+
+            Section("Vytvořeno mnou (\(created.count))") {
+                if created.isEmpty {
+                    Text("Zatím žádné akce").foregroundStyle(.secondary)
+                } else {
+                    ForEach(created) { event in
+                        VStack(alignment: .leading) {
+                            Text(event.title)
+                            Text(event.startAt.formatted(date: .abbreviated, time: .shortened))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+
+            Section("Zúčastním se (\(accepted.count))") {
+                if accepted.isEmpty {
+                    Text("Zatím nic").foregroundStyle(.secondary)
+                } else {
+                    ForEach(accepted) { event in
+                        Text(event.title)
+                    }
+                }
+            }
+
+            Section("Nezúčastním se (\(rejected.count))") {
+                if rejected.isEmpty {
+                    Text("Zatím nic").foregroundStyle(.secondary)
+                } else {
+                    ForEach(rejected) { event in
+                        Text(event.title)
+                    }
+                }
+            }
+
+            if let errorMessage {
+                Text(errorMessage).foregroundStyle(.red)
+            }
+
+            Section {
+                LabeledContent("Verze appky", value: appVersion)
+            }
+        }
+        .refreshable { await load() }
+        .onAppear { Task { await load() } }
+    }
+
     private func load() async {
+        await auth.refreshProfile()
         do {
-            async let profileTask = APIClient.shared.fetchMe()
             async let createdTask = APIClient.shared.fetchCreatedByMe()
             async let responsesTask = APIClient.shared.fetchMyResponses()
-            profile = try await profileTask
             created = try await createdTask
             responses = try await responsesTask
+            if profile?.role == "basic" {
+                verificationStatus = try? await APIClient.shared.fetchVerificationStatus()
+            }
+            if profile?.role == "admin" {
+                pendingRequests = (try? await APIClient.shared.fetchPendingVerificationRequests()) ?? []
+            }
             errorMessage = nil
         } catch {
             guard !error.isCancellation else { return }
             errorMessage = "Nepodařilo se načíst profil: \(error.localizedDescription)"
+        }
+    }
+
+    private func requestVerification() async {
+        do {
+            verificationStatus = try await APIClient.shared.requestVerification(
+                reason: verificationReason.isEmpty ? nil : verificationReason
+            )
+        } catch {
+            guard !error.isCancellation else { return }
+            errorMessage = "Nepodařilo se odeslat žádost: \(error.localizedDescription)"
+        }
+    }
+
+    private func approve(_ request: VerificationRequest) async {
+        do {
+            try await APIClient.shared.approveVerificationRequest(id: request.id)
+            pendingRequests.removeAll { $0.id == request.id }
+        } catch {
+            guard !error.isCancellation else { return }
+            errorMessage = "Nepodařilo se schválit žádost: \(error.localizedDescription)"
+        }
+    }
+
+    private func reject(_ request: VerificationRequest) async {
+        do {
+            try await APIClient.shared.rejectVerificationRequest(id: request.id)
+            pendingRequests.removeAll { $0.id == request.id }
+        } catch {
+            guard !error.isCancellation else { return }
+            errorMessage = "Nepodařilo se zamítnout žádost: \(error.localizedDescription)"
         }
     }
 }

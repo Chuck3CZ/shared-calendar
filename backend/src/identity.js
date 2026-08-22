@@ -1,36 +1,33 @@
-import { randomUUID } from "node:crypto";
 import { db } from "./db.js";
 
-const findByClientId = db.prepare("SELECT * FROM users WHERE client_id = ?");
-const insertUser = db.prepare(
-  "INSERT INTO users (id, client_id, role) VALUES (?, ?, 'basic')"
-);
+const findByToken = db.prepare(`
+  SELECT u.* FROM sessions s
+  JOIN users u ON u.id = s.user_id
+  WHERE s.token = ?
+`);
 
 /**
- * Phase 1 stand-in for real auth: the app generates a random client id
- * once and sends it as X-Client-Id. This will be replaced by Sign in
- * with Apple in phase 2 (client_id -> apple_user_id).
+ * Resolves req.user from a Bearer session token (issued by POST
+ * /auth/apple). No token, or an unknown one, just leaves req.user null —
+ * routes that require identity reject that themselves via requireUser.
  */
 export function identify(req, res, next) {
-  const clientId = req.header("X-Client-Id");
-  if (!clientId) {
-    req.user = null;
-    return next();
-  }
-
-  let user = findByClientId.get(clientId);
-  if (!user) {
-    const id = randomUUID();
-    insertUser.run(id, clientId);
-    user = findByClientId.get(clientId);
-  }
-  req.user = user;
+  const header = req.header("Authorization") || "";
+  const token = header.startsWith("Bearer ") ? header.slice("Bearer ".length) : null;
+  req.user = token ? findByToken.get(token) ?? null : null;
   next();
 }
 
 export function requireUser(req, res, next) {
   if (!req.user) {
-    return res.status(401).json({ error: "missing X-Client-Id header" });
+    return res.status(401).json({ error: "sign-in required" });
+  }
+  next();
+}
+
+export function requireAdmin(req, res, next) {
+  if (!req.user || req.user.role !== "admin") {
+    return res.status(403).json({ error: "admin only" });
   }
   next();
 }

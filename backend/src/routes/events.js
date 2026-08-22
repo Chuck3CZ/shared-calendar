@@ -29,6 +29,15 @@ const softDeleteEvent = db.prepare(`
 
 const getEvent = db.prepare("SELECT * FROM events WHERE id = ?");
 
+// Counts all events created in the window regardless of deleted_at, so
+// deleting one and recreating it can't be used to dodge the rate limit.
+const countRecentEventsByOwner = db.prepare(`
+  SELECT COUNT(*) AS count FROM events
+  WHERE owner_id = ? AND created_at >= datetime('now', '-14 days')
+`);
+
+const BASIC_RATE_LIMIT = 2;
+
 const upsertResponse = db.prepare(`
   INSERT INTO event_responses (user_id, event_id, status, responded_at)
   VALUES (?, ?, ?, datetime('now'))
@@ -76,6 +85,16 @@ eventsRouter.post("/", requireUser, (req, res) => {
   const { title, description, location, start_at, end_at } = req.body;
   if (!title || !start_at) {
     return res.status(400).json({ error: "title and start_at are required" });
+  }
+
+  if (req.user.role === "basic") {
+    const { count } = countRecentEventsByOwner.get(req.user.id);
+    if (count >= BASIC_RATE_LIMIT) {
+      return res.status(429).json({
+        error: "rate_limited",
+        message: `Základní účet může vytvořit nejvýš ${BASIC_RATE_LIMIT} akce za 14 dní. Požádej o ověření pro neomezené vytváření.`,
+      });
+    }
   }
 
   const id = randomUUID();
