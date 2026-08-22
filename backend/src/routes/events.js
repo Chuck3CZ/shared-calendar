@@ -32,7 +32,7 @@ const listPendingForUser = db.prepare(`
   FROM events e
   JOIN users u ON u.id = e.owner_id
   LEFT JOIN event_responses r ON r.event_id = e.id AND r.user_id = ?
-  WHERE r.status IS NULL AND e.owner_id != ?
+  WHERE r.status IS NULL AND (e.owner_id != ? OR ? = 'admin')
   ORDER BY e.start_at ASC
 `);
 
@@ -45,7 +45,7 @@ eventsRouter.get("/", (req, res) => {
 
 // GET /events/pending — cards not yet swiped by the current user
 eventsRouter.get("/pending", requireUser, (req, res) => {
-  res.json(listPendingForUser.all(req.user.id, req.user.id));
+  res.json(listPendingForUser.all(req.user.id, req.user.id, req.user.role));
 });
 
 // POST /events — create an event (requires identity)
