@@ -59,6 +59,13 @@ final class APIClient {
         return try decoder.decode([Event].self, from: data)
     }
 
+    /// Every visible event regardless of a prior swipe response, so it can be re-decided.
+    func fetchReview(viewAsMember: Bool = false) async throws -> [Event] {
+        let headers = viewAsMember ? ["X-View-As": "member"] : [:]
+        let data = try await request("events/review", authenticated: true, extraHeaders: headers)
+        return try decoder.decode([Event].self, from: data)
+    }
+
     func fetchMe() async throws -> UserProfile {
         let data = try await request("me", authenticated: true)
         return try decoder.decode(UserProfile.self, from: data)
@@ -78,6 +85,16 @@ final class APIClient {
         let body = try encoder.encode(payload)
         let data = try await request("events", method: "POST", body: body, authenticated: true)
         return try decoder.decode(Event.self, from: data)
+    }
+
+    func updateEvent(id: String, _ payload: NewEventPayload) async throws -> Event {
+        let body = try encoder.encode(payload)
+        let data = try await request("events/\(id)", method: "PATCH", body: body, authenticated: true)
+        return try decoder.decode(Event.self, from: data)
+    }
+
+    func deleteEvent(id: String) async throws {
+        _ = try await request("events/\(id)", method: "DELETE", authenticated: true)
     }
 
     @discardableResult

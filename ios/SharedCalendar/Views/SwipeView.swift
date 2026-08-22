@@ -4,11 +4,24 @@ struct SwipeView: View {
     @State private var pending: [Event] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var isReviewingAll = false
     @AppStorage("viewAsMember") private var viewAsMember = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
+                if viewAsMember {
+                    Text("Testovací režim člena – swipnutí se nikam neukládá")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 4)
+                }
+                if isReviewingAll {
+                    Text("Znovu procházíš všechny akce – nové rozhodnutí přepíše to staré")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 4)
+                }
                 ZStack {
                     if let errorMessage {
                         Text(errorMessage).foregroundStyle(.red).padding()
@@ -33,12 +46,23 @@ struct SwipeView: View {
             }
             .navigationTitle("Objevuj")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        isReviewingAll = true
+                        Task { await load() }
+                    } label: {
+                        Image(systemName: "arrow.uturn.backward.circle")
+                    }
+                    .accessibilityLabel("Znovu prozkoumat všechny akce")
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
+                        isReviewingAll = false
                         Task { await load() }
                     } label: {
                         Image(systemName: "arrow.clockwise")
                     }
+                    .accessibilityLabel("Načíst nové akce")
                 }
             }
             .refreshable { await load() }
@@ -51,7 +75,9 @@ struct SwipeView: View {
         isLoading = true
         defer { isLoading = false }
         do {
-            pending = try await APIClient.shared.fetchPending(viewAsMember: viewAsMember)
+            pending = isReviewingAll
+                ? try await APIClient.shared.fetchReview(viewAsMember: viewAsMember)
+                : try await APIClient.shared.fetchPending(viewAsMember: viewAsMember)
             errorMessage = nil
         } catch {
             errorMessage = "Nepodařilo se načíst akce: \(error.localizedDescription)"
@@ -60,6 +86,9 @@ struct SwipeView: View {
 
     private func respond(to event: Event, status: String) {
         pending.removeAll { $0.id == event.id }
+        // While testing as a member, the identity is ephemeral: nothing is
+        // ever persisted, so it's fully forgotten once the toggle is off.
+        guard !viewAsMember else { return }
         Task {
             try? await APIClient.shared.respond(eventId: event.id, status: status)
         }

@@ -53,3 +53,9 @@ db.exec(`
     PRIMARY KEY (user_id, apns_token)
   );
 `);
+
+try {
+  db.exec("ALTER TABLE events ADD COLUMN deleted_at TEXT");
+} catch {
+  // column already exists
+}

@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct NewEventView: View {
+    var eventToEdit: Event? = nil
+
     @Environment(\.dismiss) private var dismiss
     @State private var title = ""
     @State private var description = ""
@@ -9,6 +11,9 @@ struct NewEventView: View {
     @State private var isSubmitting = false
     @State private var errorMessage: String?
     @State private var didSubmit = false
+    @State private var didPopulate = false
+
+    private var isEditing: Bool { eventToEdit != nil }
 
     var body: some View {
         NavigationStack {
@@ -31,22 +36,32 @@ struct NewEventView: View {
                         if isSubmitting {
                             ProgressView()
                         } else {
-                            Text("Vytvořit akci")
+                            Text(isEditing ? "Uložit změny" : "Vytvořit akci")
                         }
                     }
                     .disabled(title.isEmpty || isSubmitting)
                 }
             }
-            .navigationTitle("Nová akce")
+            .navigationTitle(isEditing ? "Upravit akci" : "Nová akce")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Zrušit") { dismiss() }
                 }
             }
-            .alert("Akce vytvořena", isPresented: $didSubmit) {
+            .onAppear { populateIfNeeded() }
+            .alert(isEditing ? "Akce upravena" : "Akce vytvořena", isPresented: $didSubmit) {
                 Button("OK") { dismiss() }
             }
         }
+    }
+
+    private func populateIfNeeded() {
+        guard !didPopulate, let event = eventToEdit else { return }
+        didPopulate = true
+        title = event.title
+        description = event.description ?? ""
+        location = event.location ?? ""
+        startAt = event.startAt
     }
 
     private func submit() async {
@@ -61,11 +76,15 @@ struct NewEventView: View {
                 startAt: formatter.string(from: startAt),
                 endAt: nil
             )
-            _ = try await APIClient.shared.createEvent(payload)
+            if let event = eventToEdit {
+                _ = try await APIClient.shared.updateEvent(id: event.id, payload)
+            } else {
+                _ = try await APIClient.shared.createEvent(payload)
+            }
             errorMessage = nil
             didSubmit = true
         } catch {
-            errorMessage = "Nepodařilo se vytvořit akci: \(error.localizedDescription)"
+            errorMessage = "Nepodařilo se uložit akci: \(error.localizedDescription)"
         }
     }
 }

@@ -7,7 +7,7 @@ export const meRouter = Router();
 const listCreatedByUser = db.prepare(`
   SELECT e.*
   FROM events e
-  WHERE e.owner_id = ?
+  WHERE e.owner_id = ? AND e.deleted_at IS NULL
   ORDER BY e.start_at ASC
 `);
 
@@ -16,7 +16,7 @@ const listResponsesForUser = db.prepare(`
   FROM event_responses r
   JOIN events e ON e.id = r.event_id
   JOIN users u ON u.id = e.owner_id
-  WHERE r.user_id = ? AND r.status IN ('accepted', 'rejected')
+  WHERE r.user_id = ? AND r.status IN ('accepted', 'rejected') AND e.deleted_at IS NULL
   ORDER BY e.start_at ASC
 `);
 
