@@ -51,7 +51,7 @@ final class APIClient {
 
     private let encoder = JSONEncoder()
 
-    private func request(_ path: String, queryItems: [URLQueryItem] = [], method: String = "GET", body: Data? = nil, authenticated: Bool = false, extraHeaders: [String: String] = [:]) async throws -> Data {
+    private func request(_ path: String, queryItems: [URLQueryItem] = [], method: String = "GET", body: Data? = nil, authenticated: Bool = false, optionalAuth: Bool = false, extraHeaders: [String: String] = [:]) async throws -> Data {
         var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: true)!
         if !queryItems.isEmpty {
             components.queryItems = queryItems
@@ -63,6 +63,8 @@ final class APIClient {
             guard let token = KeychainSession.load()?.token else {
                 throw APIError.notAuthenticated
             }
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else if optionalAuth, let token = KeychainSession.load()?.token {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
         for (field, value) in extraHeaders {
@@ -126,7 +128,7 @@ final class APIClient {
             URLQueryItem(name: "from", value: formatter.string(from: from)),
             URLQueryItem(name: "to", value: formatter.string(from: to)),
         ]
-        let data = try await request("events", queryItems: queryItems)
+        let data = try await request("events", queryItems: queryItems, optionalAuth: true)
         return try decoder.decode([Event].self, from: data)
     }
 
