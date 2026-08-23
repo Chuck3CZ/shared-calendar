@@ -4,6 +4,7 @@ struct Event: Codable, Identifiable, Equatable {
     let id: String
     let ownerId: String
     let ownerName: String?
+    let ownerRole: String?
     let title: String
     let description: String?
     let location: String?
@@ -21,6 +22,7 @@ struct Event: Codable, Identifiable, Equatable {
         case id
         case ownerId = "owner_id"
         case ownerName = "owner_name"
+        case ownerRole = "owner_role"
         case title
         case description
         case location
@@ -138,6 +140,28 @@ struct AdminUser: Codable, Identifiable {
         case role
         case createdAt = "created_at"
         case latestVerificationStatus = "latest_verification_status"
+    }
+}
+
+struct BugReport: Codable, Identifiable {
+    let id: String
+    let userId: String?
+    let userDisplayName: String?
+    let description: String
+    let appVersion: String?
+    let osVersion: String?
+    let deviceModel: String?
+    let createdAt: String
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userId = "user_id"
+        case userDisplayName = "user_display_name"
+        case description
+        case appVersion = "app_version"
+        case osVersion = "os_version"
+        case deviceModel = "device_model"
+        case createdAt = "created_at"
     }
 }
 

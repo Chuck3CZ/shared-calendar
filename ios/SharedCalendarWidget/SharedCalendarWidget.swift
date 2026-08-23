@@ -10,7 +10,7 @@ struct Provider: TimelineProvider {
     func placeholder(in context: Context) -> Entry {
         Entry(
             date: Date(),
-            snapshot: UpcomingEventSnapshot(title: "Táborák", location: "U rybníka", startAt: Date().addingTimeInterval(3600))
+            snapshot: UpcomingEventSnapshot(id: "preview", title: "Táborák", location: "U rybníka", startAt: Date().addingTimeInterval(3600))
         )
     }
 
@@ -62,6 +62,7 @@ struct SharedCalendarWidgetEntryView: View {
                 Spacer(minLength: 0)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            .widgetURL(URL(string: "https://sc.gabrhelovi.cz/event/\(snapshot.id)"))
         } else {
             VStack(spacing: 6) {
                 Image(systemName: "checkmark.circle")

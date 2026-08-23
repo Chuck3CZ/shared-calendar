@@ -7,6 +7,7 @@ import WidgetKit
 /// small snapshot of "what to show" into an App Group container every time
 /// it has fresh data, and the widget just reads that back.
 struct UpcomingEventSnapshot: Codable {
+    let id: String
     let title: String
     let location: String?
     let startAt: Date

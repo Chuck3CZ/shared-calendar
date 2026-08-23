@@ -69,6 +69,9 @@ struct ProfileView: View {
                     NavigationLink("Správa uživatelů") {
                         AdminUsersView()
                     }
+                    NavigationLink("Bug reporty") {
+                        AdminBugReportsView()
+                    }
                 }
 
                 Section("Žádosti o ověření (\(pendingRequests.count))") {

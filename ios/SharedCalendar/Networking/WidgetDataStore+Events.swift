@@ -18,7 +18,7 @@ extension WidgetDataStore {
             clear()
             return
         }
-        let snapshot = UpcomingEventSnapshot(title: next.title, location: next.location, startAt: next.startAt)
+        let snapshot = UpcomingEventSnapshot(id: next.id, title: next.title, location: next.location, startAt: next.startAt)
         guard let data = try? JSONEncoder().encode(snapshot) else { return }
         defaults?.set(data, forKey: key)
         WidgetCenter.shared.reloadAllTimelines()

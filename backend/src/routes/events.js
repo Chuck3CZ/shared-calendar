@@ -7,7 +7,7 @@ import { notifyUser, notifyOtherUsers } from "../notifications.js";
 export const eventsRouter = Router();
 
 const listEvents = db.prepare(`
-  SELECT e.*, u.display_name AS owner_name,
+  SELECT e.*, u.display_name AS owner_name, u.role AS owner_role,
     (SELECT r.status FROM event_responses r WHERE r.event_id = e.id AND r.user_id = ?) AS my_status,
     (SELECT COUNT(*) FROM event_responses r WHERE r.event_id = e.id AND r.status = 'accepted') AS accepted_count
   FROM events e
@@ -35,7 +35,7 @@ const softDeleteEvent = db.prepare(`
 const getEvent = db.prepare("SELECT * FROM events WHERE id = ?");
 
 const getEventWithOwner = db.prepare(`
-  SELECT e.*, u.display_name AS owner_name,
+  SELECT e.*, u.display_name AS owner_name, u.role AS owner_role,
     (SELECT r.status FROM event_responses r WHERE r.event_id = e.id AND r.user_id = ?) AS my_status,
     (SELECT COUNT(*) FROM event_responses r WHERE r.event_id = e.id AND r.status = 'accepted') AS accepted_count
   FROM events e
@@ -244,7 +244,7 @@ eventsRouter.patch("/:id", requireUser, (req, res) => {
   if (!event || event.deleted_at) {
     return res.status(404).json({ error: "event not found" });
   }
-  if (event.owner_id !== req.user.id) {
+  if (event.owner_id !== req.user.id && req.user.role !== "admin") {
     return res.status(403).json({ error: "you can only edit your own events" });
   }
 
@@ -256,9 +256,11 @@ eventsRouter.patch("/:id", requireUser, (req, res) => {
     return res.status(400).json({ error: "location is required and must be picked from the map" });
   }
 
+  // Matched by the event's actual owner, not the requester — otherwise an
+  // admin editing someone else's event would silently update zero rows.
   updateEvent.run(
     title, description ?? null, location ?? null, start_at, end_at ?? null,
-    latitude ?? null, longitude ?? null, event.id, req.user.id
+    latitude ?? null, longitude ?? null, event.id, event.owner_id
   );
 
   for (const { user_id } of listAcceptedAttendees.all(event.id, req.user.id)) {

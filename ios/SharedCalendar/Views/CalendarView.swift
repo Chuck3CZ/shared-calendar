@@ -214,7 +214,10 @@ struct EventDetailView: View {
                         LabeledContent("Místo", value: location)
                     }
                     LabeledContent("Kdy", value: event.startAt.formatted(date: .abbreviated, time: .shortened))
-                    LabeledContent("Autor", value: isOwner ? "Ty" : (event.ownerName ?? "Neznámé jméno"))
+                    LabeledContent("Autor") {
+                        Text(isOwner ? "Ty" : (event.ownerName ?? "Neznámé jméno"))
+                            .verifiedBadge(role: event.ownerRole)
+                    }
                     if let acceptedCount = event.acceptedCount, acceptedCount > 0 {
                         LabeledContent("Jde") {
                             Label("\(acceptedCount)", systemImage: "person.2.fill")
@@ -267,7 +270,7 @@ struct EventDetailView: View {
                     }
                 } else {
                     Section {
-                        if isOwner {
+                        if isOwner || isAdmin {
                             Button("Upravit") { onEdit() }
                         }
                         if isOwner || isAdmin {

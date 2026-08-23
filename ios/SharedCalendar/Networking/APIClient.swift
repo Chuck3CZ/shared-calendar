@@ -185,6 +185,11 @@ final class APIClient {
         return try decoder.decode(AdminUser.self, from: data)
     }
 
+    func fetchBugReports() async throws -> [BugReport] {
+        let data = try await request("admin/bug-reports", authenticated: true)
+        return try decoder.decode([BugReport].self, from: data)
+    }
+
     func fetchMe() async throws -> UserProfile {
         let data = try await request("me", authenticated: true)
         return try decoder.decode(UserProfile.self, from: data)

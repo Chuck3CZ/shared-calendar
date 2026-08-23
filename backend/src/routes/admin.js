@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { db } from "../db.js";
 import { requireUser, requireAdmin } from "../identity.js";
+import { notifyUser } from "../notifications.js";
 
 export const adminRouter = Router();
 
@@ -36,6 +37,14 @@ const listDeviceTokens = db.prepare(`
   FROM device_tokens d
   JOIN users u ON u.id = d.user_id
   ORDER BY d.created_at DESC
+`);
+
+const listBugReports = db.prepare(`
+  SELECT b.*, u.display_name AS user_display_name
+  FROM bug_reports b
+  LEFT JOIN users u ON u.id = b.user_id
+  ORDER BY b.created_at DESC
+  LIMIT 200
 `);
 
 // POST /admin/bootstrap — one-time self-promotion to admin, gated by a
@@ -97,6 +106,11 @@ adminRouter.post("/verification-requests/:id/approve", requireAdmin, (req, res) 
   }
   setVerificationRequestStatus.run("approved", request.id);
   setRole.run("verified", request.user_id);
+  notifyUser(request.user_id, {
+    title: "Účet ověřen",
+    body: "Tvůj účet byl ověřen — limit na vytváření akcí je pryč.",
+    data: {},
+  }).catch((error) => console.error("verification-approved push failed:", error));
   res.json({ id: request.id, status: "approved" });
 });
 
@@ -107,5 +121,15 @@ adminRouter.post("/verification-requests/:id/reject", requireAdmin, (req, res) =
     return res.status(404).json({ error: "verification request not found" });
   }
   setVerificationRequestStatus.run("rejected", request.id);
+  notifyUser(request.user_id, {
+    title: "Žádost o ověření zamítnuta",
+    body: "Zkus to prosím znovu později, nebo se zeptej admina.",
+    data: {},
+  }).catch((error) => console.error("verification-rejected push failed:", error));
   res.json({ id: request.id, status: "rejected" });
+});
+
+// GET /admin/bug-reports — everything filed via shake-to-report, newest first.
+adminRouter.get("/bug-reports", requireAdmin, (req, res) => {
+  res.json(listBugReports.all());
 });

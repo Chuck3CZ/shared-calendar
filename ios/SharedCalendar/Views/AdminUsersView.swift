@@ -22,7 +22,9 @@ struct AdminUsersView: View {
             ForEach(users) { user in
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
-                        Text(user.displayName ?? "Bez jména").font(.headline)
+                        Text(user.displayName ?? "Bez jména")
+                            .font(.headline)
+                            .verifiedBadge(role: user.role)
                         Spacer()
                         Menu(label(for: user.role)) {
                             ForEach(Self.roles, id: \.value) { role in
