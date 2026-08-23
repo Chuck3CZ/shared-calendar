@@ -38,7 +38,7 @@ function getProviderToken() {
  * shouldRemoveToken } — the caller decides what to do with a dead token
  * (APNs returns 410 Gone / "Unregistered" once a token stops being valid).
  */
-export function sendPush(deviceToken, { title, body, data }) {
+export function sendPush(deviceToken, { title, body, data, badge }) {
   return new Promise((resolve) => {
     if (!isConfigured()) {
       resolve({ ok: false, status: 0, shouldRemoveToken: false, error: "APNs not configured" });
@@ -47,7 +47,7 @@ export function sendPush(deviceToken, { title, body, data }) {
 
     const host = process.env.APNS_PRODUCTION === "true" ? PRODUCTION_HOST : SANDBOX_HOST;
     const payload = JSON.stringify({
-      aps: { alert: { title, body }, sound: "default" },
+      aps: { alert: { title, body }, sound: "default", badge },
       ...(data ?? {}),
     });
 

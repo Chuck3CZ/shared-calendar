@@ -21,7 +21,7 @@ struct NewEventView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Akce") {
+                Section {
                     TextField("Název", text: $title)
                     TextField("Popis", text: $description, axis: .vertical)
                     Button {
@@ -45,6 +45,10 @@ struct NewEventView: View {
                         }
                     }
                     DatePicker("Kdy", selection: $startAt)
+                } header: {
+                    Text("Akce")
+                } footer: {
+                    Text("Místo je povinné.")
                 }
 
                 if let errorMessage {
@@ -61,7 +65,7 @@ struct NewEventView: View {
                             Text(isEditing ? "Uložit změny" : "Vytvořit akci")
                         }
                     }
-                    .disabled(title.isEmpty || isSubmitting)
+                    .disabled(title.isEmpty || location.isEmpty || isSubmitting)
                 }
             }
             .navigationTitle(isEditing ? "Upravit akci" : "Nová akce")

@@ -37,15 +37,28 @@ const insertNotification = db.prepare(`
   INSERT INTO notifications (id, user_id, title, body, event_id) VALUES (?, ?, ?, ?, ?)
 `);
 
+// Same visibility rule as GET /events/pending (own events only count for an
+// admin) — the app icon badge should always match what the swipe queue
+// would show, whether the count changed because of this push or something
+// else entirely.
+const countPendingForUser = db.prepare(`
+  SELECT COUNT(*) AS count
+  FROM events e
+  JOIN users u ON u.id = ?
+  LEFT JOIN event_responses r ON r.event_id = e.id AND r.user_id = ?
+  WHERE e.deleted_at IS NULL AND r.status IS NULL AND (e.owner_id != ? OR u.role = 'admin')
+`);
+
 // Shared by the reminder cron below and by events.js for "new event" /
 // "an event you're attending changed" pushes. Fire-and-forget from routes
 // (don't await in the request path) — a slow or failed push shouldn't hold
 // up the HTTP response.
 export async function notifyUser(userId, payload) {
   insertNotification.run(randomUUID(), userId, payload.title, payload.body, payload.data?.event_id ?? null);
+  const badge = countPendingForUser.get(userId, userId, userId).count;
   const tokens = listDeviceTokensForUser.all(userId);
   for (const { apns_token } of tokens) {
-    const result = await sendPush(apns_token, payload);
+    const result = await sendPush(apns_token, { ...payload, badge });
     if (result.shouldRemoveToken) {
       deleteDeviceToken.run(apns_token);
     } else if (!result.ok) {
@@ -77,6 +90,10 @@ export async function checkAndSendReminders() {
     return reminderAt <= now.getTime();
   });
 
+  if (candidates.length > 0) {
+    console.log(`[reminders] ${due.length} due out of ${candidates.length} not-yet-notified candidates at ${now.toISOString()}`);
+  }
+
   for (const reminder of due) {
     await notifyUser(reminder.user_id, {
       title: titleFor(reminder.minutes_before),
@@ -90,6 +107,7 @@ export async function checkAndSendReminders() {
 }
 
 export function startNotificationScheduler() {
+  console.log(`[reminders] scheduler started, checking every ${CHECK_INTERVAL_MS / 1000}s`);
   setInterval(() => {
     checkAndSendReminders().catch((error) => console.error("notification check failed:", error));
   }, CHECK_INTERVAL_MS);
