@@ -36,12 +36,15 @@ struct WeatherSummaryView: View {
         let location = CLLocation(latitude: latitude, longitude: longitude)
         do {
             let hourly = try await WeatherService.shared.weather(for: location, including: .hourly)
+            print("[weather] got \(hourly.count) hourly entries for \(latitude), \(longitude)")
             let closest = hourly.min { abs($0.date.timeIntervalSince(date)) < abs($1.date.timeIntervalSince(date)) }
             if let closest, abs(closest.date.timeIntervalSince(date)) < 90 * 60 {
                 hour = closest
+            } else if let closest {
+                print("[weather] closest entry is \(closest.date), too far from target \(date)")
             }
         } catch {
-            // Non-fatal: the row just shows "not available yet".
+            print("[weather] FAILED: \(error)")
         }
     }
 }
