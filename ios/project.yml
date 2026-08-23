@@ -29,3 +29,16 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         DEVELOPMENT_TEAM: LT2EBE5TBV
         CODE_SIGN_STYLE: Automatic
+    postbuildScripts:
+      - name: Stamp git commit into Info.plist
+        basedOnDependencyAnalysis: false
+        script: |
+          COMMIT=$(git -C "${SRCROOT}" rev-parse --short HEAD 2>/dev/null || echo "unknown")
+          COMMIT_COUNT=$(git -C "${SRCROOT}" rev-list --count HEAD 2>/dev/null || echo "0")
+          DIRTY=$(git -C "${SRCROOT}" status --porcelain 2>/dev/null)
+          if [ -n "$DIRTY" ]; then COMMIT="${COMMIT}+"; fi
+          PLIST="${TARGET_BUILD_DIR}/${INFOPLIST_PATH}"
+          /usr/libexec/PlistBuddy -c "Delete :GitCommit" "$PLIST" 2>/dev/null
+          /usr/libexec/PlistBuddy -c "Add :GitCommit string $COMMIT" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $COMMIT_COUNT" "$PLIST" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $COMMIT_COUNT" "$PLIST"

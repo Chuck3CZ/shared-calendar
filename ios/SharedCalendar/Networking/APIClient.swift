@@ -175,6 +175,18 @@ final class APIClient {
         return try decoder.decode(Event.self, from: data)
     }
 
+    func fetchReminders(eventId: String) async throws -> ReminderSettings {
+        let data = try await request("events/\(eventId)/reminders", authenticated: true)
+        return try decoder.decode(ReminderSettings.self, from: data)
+    }
+
+    @discardableResult
+    func setReminders(eventId: String, minutes: [Int]) async throws -> ReminderSettings {
+        let body = try encoder.encode(["minutes": minutes])
+        let data = try await request("events/\(eventId)/reminders", method: "PUT", body: body, authenticated: true)
+        return try decoder.decode(ReminderSettings.self, from: data)
+    }
+
     func deleteEvent(id: String) async throws {
         _ = try await request("events/\(id)", method: "DELETE", authenticated: true)
     }

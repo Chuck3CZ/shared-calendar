@@ -45,6 +45,13 @@ struct CalendarView: View {
                                         }
                                     }
                                     Spacer()
+                                    if event.myStatus == "accepted" {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundStyle(.green)
+                                    } else if event.myStatus == "rejected" {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .foregroundStyle(.red)
+                                    }
                                     Image(systemName: "chevron.right")
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
@@ -124,9 +131,45 @@ private struct EventDetailView: View {
     @State private var showingSlideToDelete = false
     @State private var isDeleting = false
     @State private var errorMessage: String?
+    @State private var reminderMinutes: [Int] = []
 
     private var isOwner: Bool { auth.session?.profile.id == event.ownerId }
     private var isAdmin: Bool { auth.session?.profile.role == "admin" }
+    private var isAttending: Bool { event.myStatus == "accepted" }
+
+    private static let reminderOptions: [(label: String, minutes: Int)] = [
+        ("V čas akce", 0),
+        ("10 minut předem", 10),
+        ("30 minut předem", 30),
+        ("Hodinu předem", 60),
+        ("2 hodiny předem", 120),
+        ("Den předem", 1440),
+    ]
+
+    private var firstReminderBinding: Binding<Int?> {
+        Binding(
+            get: { reminderMinutes.first },
+            set: { newValue in
+                reminderMinutes = newValue.map { [$0] } ?? []
+                Task { await saveReminders() }
+            }
+        )
+    }
+
+    private var secondReminderBinding: Binding<Int?> {
+        Binding(
+            get: { reminderMinutes.count > 1 ? reminderMinutes[1] : nil },
+            set: { newValue in
+                guard !reminderMinutes.isEmpty else { return }
+                if let newValue {
+                    if reminderMinutes.count > 1 { reminderMinutes[1] = newValue } else { reminderMinutes.append(newValue) }
+                } else if reminderMinutes.count > 1 {
+                    reminderMinutes.removeLast()
+                }
+                Task { await saveReminders() }
+            }
+        )
+    }
 
     var body: some View {
         NavigationStack {
@@ -141,6 +184,27 @@ private struct EventDetailView: View {
                     }
                     LabeledContent("Kdy", value: event.startAt.formatted(date: .abbreviated, time: .shortened))
                     LabeledContent("Autor", value: isOwner ? "Ty" : (event.ownerName ?? "Neznámé jméno"))
+                }
+
+                if isAttending {
+                    Section {
+                        Picker("První upozornění", selection: firstReminderBinding) {
+                            Text("Žádné").tag(Int?.none)
+                            ForEach(Self.reminderOptions, id: \.minutes) { option in
+                                Text(option.label).tag(Int?.some(option.minutes))
+                            }
+                        }
+                        if reminderMinutes.first != nil {
+                            Picker("Druhé upozornění", selection: secondReminderBinding) {
+                                Text("Žádné").tag(Int?.none)
+                                ForEach(Self.reminderOptions.filter { $0.minutes != reminderMinutes.first }, id: \.minutes) { option in
+                                    Text(option.label).tag(Int?.some(option.minutes))
+                                }
+                            }
+                        }
+                    } header: {
+                        Text("Upozornění")
+                    }
                 }
 
                 if let errorMessage {
@@ -184,6 +248,27 @@ private struct EventDetailView: View {
             } message: {
                 Text("Akce se přesune do koše.")
             }
+            .task { await loadReminders() }
+        }
+    }
+
+    private func loadReminders() async {
+        guard isAttending else { return }
+        do {
+            let settings = try await APIClient.shared.fetchReminders(eventId: event.id)
+            reminderMinutes = settings.minutes
+        } catch {
+            // Non-fatal: reminder section just starts empty.
+        }
+    }
+
+    private func saveReminders() async {
+        do {
+            try await APIClient.shared.setReminders(eventId: event.id, minutes: reminderMinutes)
+            errorMessage = nil
+        } catch {
+            guard !error.isCancellation else { return }
+            errorMessage = "Nepodařilo se uložit upozornění: \(error.localizedDescription)"
         }
     }
 

@@ -124,6 +124,7 @@
 			buildPhases = (
 				96D383073F0542CFC8F7508B /* Sources */,
 				30F272A08F52B4BA0F5F2137 /* Resources */,
+				38A7D7681D5834D662FAA276 /* Stamp git commit into Info.plist */,
 			);
 			buildRules = (
 			);
@@ -180,6 +181,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		38A7D7681D5834D662FAA276 /* Stamp git commit into Info.plist */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Stamp git commit into Info.plist";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "COMMIT=$(git -C \"${SRCROOT}\" rev-parse --short HEAD 2>/dev/null || echo \"unknown\")\nCOMMIT_COUNT=$(git -C \"${SRCROOT}\" rev-list --count HEAD 2>/dev/null || echo \"0\")\nDIRTY=$(git -C \"${SRCROOT}\" status --porcelain 2>/dev/null)\nif [ -n \"$DIRTY\" ]; then COMMIT=\"${COMMIT}+\"; fi\nPLIST=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Delete :GitCommit\" \"$PLIST\" 2>/dev/null\n/usr/libexec/PlistBuddy -c \"Add :GitCommit string $COMMIT\" \"$PLIST\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $COMMIT_COUNT\" \"$PLIST\" 2>/dev/null || \\\n  /usr/libexec/PlistBuddy -c \"Add :CFBundleVersion string $COMMIT_COUNT\" \"$PLIST\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		96D383073F0542CFC8F7508B /* Sources */ = {

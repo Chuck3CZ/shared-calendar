@@ -26,7 +26,9 @@ struct ProfileView: View {
     private var appVersion: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
-        return "\(version) (\(build))"
+        let commit = Bundle.main.infoDictionary?["GitCommit"] as? String
+        guard let commit, !commit.isEmpty else { return "\(version) (\(build))" }
+        return "\(version) (\(build)) · \(commit)"
     }
 
     var body: some View {

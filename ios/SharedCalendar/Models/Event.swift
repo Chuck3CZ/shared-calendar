@@ -10,6 +10,8 @@ struct Event: Codable, Identifiable, Equatable {
     let startAt: Date
     let endAt: Date?
     let createdAt: String
+    /// "accepted" / "rejected" / nil (no response yet, or not signed in)
+    let myStatus: String?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -21,6 +23,7 @@ struct Event: Codable, Identifiable, Equatable {
         case startAt = "start_at"
         case endAt = "end_at"
         case createdAt = "created_at"
+        case myStatus = "my_status"
     }
 }
 
@@ -93,6 +96,10 @@ struct RespondedEvent: Codable, Identifiable {
         case endAt = "end_at"
         case status
     }
+}
+
+struct ReminderSettings: Codable {
+    let minutes: [Int]
 }
 
 struct NewEventPayload: Codable {
