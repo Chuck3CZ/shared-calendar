@@ -1,5 +1,6 @@
 import SwiftUI
 import MapKit
+import UserNotifications
 
 struct SwipeView: View {
     @ObservedObject private var auth = AuthManager.shared
@@ -91,6 +92,7 @@ struct SwipeView: View {
         do {
             pending = try await APIClient.shared.fetchPending(viewAsMember: viewAsMember)
             errorMessage = nil
+            updateBadge()
         } catch {
             guard !error.isCancellation else { return }
             errorMessage = "Nepodařilo se načíst akce: \(error.localizedDescription)"
@@ -114,11 +116,22 @@ struct SwipeView: View {
 
     private func respond(to event: Event, status: String) {
         pending.removeAll { $0.id == event.id }
+        updateBadge()
         // While testing as a member, the identity is ephemeral: nothing is
         // ever persisted, so it's fully forgotten once the toggle is off.
         guard !viewAsMember else { return }
         Task {
             try? await APIClient.shared.respond(eventId: event.id, status: status)
+        }
+    }
+
+    /// The app icon badge mirrors "how many events are waiting for you to
+    /// swipe" — not the "review everything again" count, which is a
+    /// deliberate one-off action rather than an outstanding queue.
+    private func updateBadge() {
+        guard !viewAsMember else { return }
+        Task {
+            try? await UNUserNotificationCenter.current().setBadgeCount(pending.count)
         }
     }
 }
@@ -143,17 +156,16 @@ private struct SwipeCard: View {
                 Label(location, systemImage: "mappin.and.ellipse")
                     .foregroundStyle(.secondary)
             }
+            if let acceptedCount = event.acceptedCount, acceptedCount > 0 {
+                Label("\(acceptedCount) jde", systemImage: "person.2.fill")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
             if let description = event.description {
                 Text(description).lineLimit(3)
             }
             if let latitude = event.latitude, let longitude = event.longitude {
-                let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-                Map(initialPosition: .region(MKCoordinateRegion(center: coordinate, span: MKCoordinateSpan(latitudeDelta: 0.0008, longitudeDelta: 0.0008)))) {
-                    Marker(event.location ?? event.title, coordinate: coordinate)
-                }
-                .frame(height: 140)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .allowsHitTesting(false)
+                StaticMapPreview(latitude: latitude, longitude: longitude, title: event.location ?? event.title)
             }
             Spacer()
             HStack {

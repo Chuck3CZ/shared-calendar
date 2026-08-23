@@ -36,6 +36,13 @@ const listResponsesForUser = db.prepare(`
   ORDER BY e.start_at ASC
 `);
 
+const listNotifications = db.prepare(`
+  SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 100
+`);
+const markAllNotificationsRead = db.prepare(`
+  UPDATE notifications SET read_at = datetime('now') WHERE user_id = ? AND read_at IS NULL
+`);
+
 meRouter.get("/", requireUser, (req, res) => {
   res.json(req.user);
 });
@@ -87,4 +94,15 @@ meRouter.post("/verification-request", requireUser, (req, res) => {
   const id = randomUUID();
   insertVerificationRequest.run(id, req.user.id, req.body?.reason ?? null);
   res.status(201).json(findLatestVerificationRequest.get(req.user.id));
+});
+
+// GET /me/notifications — history of pushes sent to this user (the bell icon).
+meRouter.get("/notifications", requireUser, (req, res) => {
+  res.json(listNotifications.all(req.user.id));
+});
+
+// POST /me/notifications/read — marks everything currently unread as read.
+meRouter.post("/notifications/read", requireUser, (req, res) => {
+  markAllNotificationsRead.run(req.user.id);
+  res.status(204).end();
 });

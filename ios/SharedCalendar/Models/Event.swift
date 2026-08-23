@@ -14,6 +14,8 @@ struct Event: Codable, Identifiable, Equatable {
     let myStatus: String?
     let latitude: Double?
     let longitude: Double?
+    /// How many people (besides a pending count of nobody) have swiped "accepted".
+    let acceptedCount: Int?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -28,6 +30,7 @@ struct Event: Codable, Identifiable, Equatable {
         case myStatus = "my_status"
         case latitude
         case longitude
+        case acceptedCount = "accepted_count"
     }
 }
 
@@ -104,6 +107,22 @@ struct RespondedEvent: Codable, Identifiable {
 
 struct ReminderSettings: Codable {
     let minutes: [Int]
+}
+
+struct AppNotification: Codable, Identifiable {
+    let id: String
+    let title: String
+    let body: String
+    let eventId: String?
+    let createdAt: String
+    let readAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, title, body
+        case eventId = "event_id"
+        case createdAt = "created_at"
+        case readAt = "read_at"
+    }
 }
 
 struct NewEventPayload: Codable {

@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { db } from "./db.js";
 import { sendPush } from "./apns.js";
 
@@ -32,12 +33,16 @@ const deleteDeviceToken = db.prepare("DELETE FROM device_tokens WHERE apns_token
 const listOtherUsersWithDevices = db.prepare(
   "SELECT DISTINCT user_id FROM device_tokens WHERE user_id != ?"
 );
+const insertNotification = db.prepare(`
+  INSERT INTO notifications (id, user_id, title, body, event_id) VALUES (?, ?, ?, ?, ?)
+`);
 
 // Shared by the reminder cron below and by events.js for "new event" /
 // "an event you're attending changed" pushes. Fire-and-forget from routes
 // (don't await in the request path) — a slow or failed push shouldn't hold
 // up the HTTP response.
 export async function notifyUser(userId, payload) {
+  insertNotification.run(randomUUID(), userId, payload.title, payload.body, payload.data?.event_id ?? null);
   const tokens = listDeviceTokensForUser.all(userId);
   for (const { apns_token } of tokens) {
     const result = await sendPush(apns_token, payload);

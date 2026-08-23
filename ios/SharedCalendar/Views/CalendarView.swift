@@ -16,6 +16,7 @@ struct CalendarView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var showingNewEvent = false
+    @State private var showingNotifications = false
     @State private var editingEvent: Event?
     @State private var detailEvent: Event?
     @AppStorage("viewAsMember") private var viewAsMember = false
@@ -75,6 +76,16 @@ struct CalendarView: View {
             }
             .navigationTitle("Kalendář")
             .toolbar {
+                if auth.isSignedIn {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            showingNotifications = true
+                        } label: {
+                            Image(systemName: "bell")
+                        }
+                        .accessibilityLabel("Historie notifikací")
+                    }
+                }
                 if auth.isSignedIn && !viewAsMember {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
@@ -90,6 +101,9 @@ struct CalendarView: View {
                 Task { await load() }
             }) {
                 NewEventView()
+            }
+            .sheet(isPresented: $showingNotifications) {
+                NotificationHistoryView()
             }
             .sheet(item: $editingEvent, onDismiss: {
                 Task { await load() }
@@ -199,14 +213,14 @@ struct EventDetailView: View {
                     }
                     LabeledContent("Kdy", value: event.startAt.formatted(date: .abbreviated, time: .shortened))
                     LabeledContent("Autor", value: isOwner ? "Ty" : (event.ownerName ?? "Neznámé jméno"))
-                    if let latitude = event.latitude, let longitude = event.longitude {
-                        let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-                        Map(initialPosition: .region(MKCoordinateRegion(center: coordinate, span: MKCoordinateSpan(latitudeDelta: 0.002, longitudeDelta: 0.002)))) {
-                            Marker(event.location ?? event.title, coordinate: coordinate)
+                    if let acceptedCount = event.acceptedCount, acceptedCount > 0 {
+                        LabeledContent("Jde") {
+                            Label("\(acceptedCount)", systemImage: "person.2.fill")
                         }
-                        .frame(height: 150)
-                        .allowsHitTesting(false)
-                        .listRowInsets(EdgeInsets())
+                    }
+                    if let latitude = event.latitude, let longitude = event.longitude {
+                        StaticMapPreview(latitude: latitude, longitude: longitude, title: event.location ?? event.title, spanDelta: 0.002, height: 150)
+                            .listRowInsets(EdgeInsets())
                         WeatherSummaryView(latitude: latitude, longitude: longitude, date: event.startAt)
                         Button("Otevřít v Mapách") {
                             openInMaps(latitude: latitude, longitude: longitude, name: event.location ?? event.title)

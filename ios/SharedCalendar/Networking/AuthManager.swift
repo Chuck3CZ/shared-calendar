@@ -51,6 +51,16 @@ final class AuthManager: ObservableObject {
         }
         KeychainSession.clear()
         session = nil
+        Task { try? await UNUserNotificationCenter.current().setBadgeCount(0) }
+    }
+
+    /// Mirrors the app icon badge to "how many events are waiting to be
+    /// swiped". Called on launch and on returning to the foreground, so the
+    /// badge is right even if the user never opens the Objevuj tab.
+    func refreshBadge() async {
+        guard session != nil else { return }
+        guard let pending = try? await APIClient.shared.fetchPending() else { return }
+        try? await UNUserNotificationCenter.current().setBadgeCount(pending.count)
     }
 
     /// Re-fetches the profile (role may have changed, e.g. a verification

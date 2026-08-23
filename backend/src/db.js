@@ -71,6 +71,19 @@ db.exec(`
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     UNIQUE (user_id, event_id, minutes_before)
   );
+
+  -- One row per logical notification handed to notifyUser(), independent of
+  -- how many devices it actually reached — lets the app show a history even
+  -- for a user who hasn't granted push permission.
+  CREATE TABLE IF NOT EXISTS notifications (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id),
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    event_id TEXT REFERENCES events(id),
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    read_at TEXT
+  );
 `);
 
 try {

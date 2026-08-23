@@ -8,7 +8,8 @@ export const eventsRouter = Router();
 
 const listEvents = db.prepare(`
   SELECT e.*, u.display_name AS owner_name,
-    (SELECT r.status FROM event_responses r WHERE r.event_id = e.id AND r.user_id = ?) AS my_status
+    (SELECT r.status FROM event_responses r WHERE r.event_id = e.id AND r.user_id = ?) AS my_status,
+    (SELECT COUNT(*) FROM event_responses r WHERE r.event_id = e.id AND r.status = 'accepted') AS accepted_count
   FROM events e
   JOIN users u ON u.id = e.owner_id
   WHERE e.deleted_at IS NULL AND e.start_at >= ? AND e.start_at <= ?
@@ -35,7 +36,8 @@ const getEvent = db.prepare("SELECT * FROM events WHERE id = ?");
 
 const getEventWithOwner = db.prepare(`
   SELECT e.*, u.display_name AS owner_name,
-    (SELECT r.status FROM event_responses r WHERE r.event_id = e.id AND r.user_id = ?) AS my_status
+    (SELECT r.status FROM event_responses r WHERE r.event_id = e.id AND r.user_id = ?) AS my_status,
+    (SELECT COUNT(*) FROM event_responses r WHERE r.event_id = e.id AND r.status = 'accepted') AS accepted_count
   FROM events e
   JOIN users u ON u.id = e.owner_id
   WHERE e.id = ? AND e.deleted_at IS NULL
@@ -78,7 +80,8 @@ const listAcceptedAttendees = db.prepare(
 );
 
 const listPendingForUser = db.prepare(`
-  SELECT e.*, u.display_name AS owner_name
+  SELECT e.*, u.display_name AS owner_name,
+    (SELECT COUNT(*) FROM event_responses r2 WHERE r2.event_id = e.id AND r2.status = 'accepted') AS accepted_count
   FROM events e
   JOIN users u ON u.id = e.owner_id
   LEFT JOIN event_responses r ON r.event_id = e.id AND r.user_id = ?
@@ -89,7 +92,8 @@ const listPendingForUser = db.prepare(`
 // Same visibility rule as pending, but ignores prior responses so a user
 // can revisit and overwrite a decision they already made.
 const listReviewForUser = db.prepare(`
-  SELECT e.*, u.display_name AS owner_name
+  SELECT e.*, u.display_name AS owner_name,
+    (SELECT COUNT(*) FROM event_responses r WHERE r.event_id = e.id AND r.status = 'accepted') AS accepted_count
   FROM events e
   JOIN users u ON u.id = e.owner_id
   WHERE e.deleted_at IS NULL AND (e.owner_id != ? OR ? = 'admin')

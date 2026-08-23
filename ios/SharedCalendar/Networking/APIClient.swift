@@ -159,6 +159,15 @@ final class APIClient {
         return try decoder.decode([Event].self, from: data)
     }
 
+    func fetchNotifications() async throws -> [AppNotification] {
+        let data = try await request("me/notifications", authenticated: true)
+        return try decoder.decode([AppNotification].self, from: data)
+    }
+
+    func markNotificationsRead() async throws {
+        _ = try await request("me/notifications/read", method: "POST", authenticated: true)
+    }
+
     func fetchMe() async throws -> UserProfile {
         let data = try await request("me", authenticated: true)
         return try decoder.decode(UserProfile.self, from: data)
