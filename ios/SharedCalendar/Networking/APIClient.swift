@@ -51,7 +51,7 @@ final class APIClient {
 
     private let encoder = JSONEncoder()
 
-    private func request(_ path: String, queryItems: [URLQueryItem] = [], method: String = "GET", body: Data? = nil, authenticated: Bool = false, optionalAuth: Bool = false, extraHeaders: [String: String] = [:]) async throws -> Data {
+    private func request(_ path: String, queryItems: [URLQueryItem] = [], method: String = "GET", body: Data? = nil, authenticated: Bool = false, optionalAuth: Bool = false, bearerOverride: String? = nil, extraHeaders: [String: String] = [:]) async throws -> Data {
         var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: true)!
         if !queryItems.isEmpty {
             components.queryItems = queryItems
@@ -59,7 +59,9 @@ final class APIClient {
         var request = URLRequest(url: components.url!)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        if authenticated {
+        if let bearerOverride {
+            request.setValue("Bearer \(bearerOverride)", forHTTPHeaderField: "Authorization")
+        } else if authenticated {
             guard let token = KeychainSession.load()?.token else {
                 throw APIError.notAuthenticated
             }
@@ -84,6 +86,13 @@ final class APIClient {
             throw APIError.server(message)
         }
         return data
+    }
+
+    /// Revokes a session server-side. Takes the token explicitly rather than
+    /// reading it from Keychain, since this is called right as sign-out is
+    /// clearing that same Keychain entry.
+    func revokeSession(token: String) async throws {
+        _ = try await request("auth/session", method: "DELETE", bearerOverride: token)
     }
 
     func authenticateWithApple(identityToken: String, fullName: String?) async throws -> AuthResponse {

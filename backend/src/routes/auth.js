@@ -2,6 +2,7 @@ import { Router } from "express";
 import { randomUUID } from "node:crypto";
 import { db } from "../db.js";
 import { verifyAppleIdentityToken } from "../apple.js";
+import { requireUser } from "../identity.js";
 
 export const authRouter = Router();
 
@@ -47,4 +48,14 @@ authRouter.post("/apple", async (req, res) => {
   const token = randomUUID();
   insertSession.run(token, user.id);
   res.json({ token, user });
+});
+
+const deleteSession = db.prepare("DELETE FROM sessions WHERE token = ?");
+
+// DELETE /auth/session — revoke the token used to make this request, so
+// signing out actually invalidates it server-side instead of just
+// forgetting it locally (it would otherwise keep working forever).
+authRouter.delete("/session", requireUser, (req, res) => {
+  deleteSession.run(req.sessionToken);
+  res.status(204).end();
 });

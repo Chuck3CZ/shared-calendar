@@ -14,6 +14,7 @@ const findByToken = db.prepare(`
 export function identify(req, res, next) {
   const header = req.header("Authorization") || "";
   const token = header.startsWith("Bearer ") ? header.slice("Bearer ".length) : null;
+  req.sessionToken = token;
   req.user = token ? findByToken.get(token) ?? null : null;
   next();
 }

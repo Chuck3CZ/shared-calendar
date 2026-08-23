@@ -46,6 +46,9 @@ final class AuthManager: ObservableObject {
     }
 
     func signOut() {
+        if let token = session?.token {
+            Task { try? await APIClient.shared.revokeSession(token: token) }
+        }
         KeychainSession.clear()
         session = nil
     }
