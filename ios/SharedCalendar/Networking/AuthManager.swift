@@ -40,6 +40,7 @@ final class AuthManager: ObservableObject {
     /// before push support shipped never got a first chance to ask).
     func registerForPushNotifications() async {
         let granted = (try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])) ?? false
+        print("[push] notification permission granted: \(granted)")
         guard granted else { return }
         UIApplication.shared.registerForRemoteNotifications()
     }

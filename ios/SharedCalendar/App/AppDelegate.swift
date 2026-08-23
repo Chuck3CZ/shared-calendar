@@ -9,13 +9,24 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         let hexToken = deviceToken.map { String(format: "%02x", $0) }.joined()
+        print("[push] got APNs device token: \(hexToken)")
         PushTokenStore.current = hexToken
-        guard AuthManager.shared.isSignedIn else { return }
-        Task { try? await APIClient.shared.registerDeviceToken(hexToken) }
+        guard AuthManager.shared.isSignedIn else {
+            print("[push] not signed in yet, deferring registration with backend")
+            return
+        }
+        Task {
+            do {
+                try await APIClient.shared.registerDeviceToken(hexToken)
+                print("[push] registered device token with backend")
+            } catch {
+                print("[push] FAILED to register device token with backend: \(error)")
+            }
+        }
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        // Non-fatal: the app works fine without push, just no reminders.
+        print("[push] FAILED to register for remote notifications: \(error)")
     }
 }
 
