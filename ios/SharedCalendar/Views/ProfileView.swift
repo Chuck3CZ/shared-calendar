@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct ProfileView: View {
     @ObservedObject private var auth = AuthManager.shared
@@ -8,6 +9,7 @@ struct ProfileView: View {
     @State private var pendingRequests: [VerificationRequest] = []
     @State private var verificationReason = ""
     @State private var errorMessage: String?
+    @State private var didCopyToken = false
     @AppStorage("viewAsMember") private var viewAsMember = false
 
     private var profile: UserProfile? { auth.session?.profile }
@@ -53,18 +55,6 @@ struct ProfileView: View {
             } footer: {
                 if profile?.displayName == nil {
                     Text("Apple posílá jméno appce jen při úplně prvním přihlášení. Pokud chybí, odhlas se, v Nastavení telefonu (Apple ID → Přihlášení a zabezpečení → Aplikace používající Apple ID) u téhle appky zruš přístup a přihlas se znovu — příště už jméno pošle.")
-                }
-            }
-
-            if profile?.role != "admin" {
-                Section {
-                    LabeledContent("Session token") {
-                        Text(auth.session?.token ?? "")
-                            .font(.caption2)
-                            .textSelection(.enabled)
-                    }
-                } footer: {
-                    Text("Jen pro první nastavení administrátora přes POST /admin/bootstrap. Až budeš admin, tahle sekce zmizí.")
                 }
             }
 
@@ -158,7 +148,26 @@ struct ProfileView: View {
             }
 
             Section {
+                Button {
+                    UIPasteboard.general.string = auth.session?.token
+                    didCopyToken = true
+                    Task {
+                        try? await Task.sleep(for: .seconds(1.5))
+                        didCopyToken = false
+                    }
+                } label: {
+                    LabeledContent("Session token") {
+                        Text(didCopyToken ? "Zkopírováno" : (auth.session?.token ?? ""))
+                            .font(.caption2)
+                            .foregroundStyle(didCopyToken ? .green : .secondary)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                    }
+                }
+                .buttonStyle(.plain)
                 LabeledContent("Verze appky", value: appVersion)
+            } footer: {
+                Text("Klepnutím na token ho zkopíruješ do schránky — hodí se pro ladění přes curl.")
             }
         }
         .refreshable { await load() }
