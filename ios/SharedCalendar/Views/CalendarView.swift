@@ -194,6 +194,13 @@ private struct EventDetailView: View {
                     LabeledContent("Kdy", value: event.startAt.formatted(date: .abbreviated, time: .shortened))
                     LabeledContent("Autor", value: isOwner ? "Ty" : (event.ownerName ?? "Neznámé jméno"))
                     if let latitude = event.latitude, let longitude = event.longitude {
+                        let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+                        Map(initialPosition: .region(MKCoordinateRegion(center: coordinate, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)))) {
+                            Marker(event.location ?? event.title, coordinate: coordinate)
+                        }
+                        .frame(height: 150)
+                        .allowsHitTesting(false)
+                        .listRowInsets(EdgeInsets())
                         WeatherSummaryView(latitude: latitude, longitude: longitude, date: event.startAt)
                         Button("Otevřít v Mapách") {
                             openInMaps(latitude: latitude, longitude: longitude, name: event.location ?? event.title)
