@@ -3,14 +3,17 @@ import WeatherKit
 import CoreLocation
 
 /// Shows the forecast closest to an event's start time at its location.
-/// WeatherKit's hourly forecast only reaches a limited number of days out,
-/// so far-future events just show "not available yet" rather than an error.
+/// Tries the hourly forecast first (precise, but only reaches a handful of
+/// days out); for anything further away falls back to that calendar day's
+/// daily forecast (a high/low range, but reaches much further out) before
+/// giving up and showing "not available yet".
 struct WeatherSummaryView: View {
     let latitude: Double
     let longitude: Double
     let date: Date
 
     @State private var hour: HourWeather?
+    @State private var day: DayWeather?
     @State private var isLoading = true
 
     var body: some View {
@@ -18,7 +21,12 @@ struct WeatherSummaryView: View {
             if let hour {
                 HStack(spacing: 6) {
                     Image(systemName: hour.symbolName)
-                    Text("\(hour.temperature.formatted(.measurement(width: .abbreviated, numberFormatStyle: .number.precision(.fractionLength(0))))) · \(hour.condition.description)")
+                    Text("\(temperatureText(hour.temperature)) · \(hour.condition.description)")
+                }
+            } else if let day {
+                HStack(spacing: 6) {
+                    Image(systemName: day.symbolName)
+                    Text("\(temperatureText(day.lowTemperature))–\(temperatureText(day.highTemperature)) · \(day.condition.description)")
                 }
             } else if isLoading {
                 ProgressView()
@@ -30,18 +38,25 @@ struct WeatherSummaryView: View {
         .task { await load() }
     }
 
+    private func temperatureText(_ measurement: Measurement<UnitTemperature>) -> String {
+        measurement.formatted(.measurement(width: .abbreviated, numberFormatStyle: .number.precision(.fractionLength(0))))
+    }
+
     private func load() async {
         isLoading = true
         defer { isLoading = false }
         let location = CLLocation(latitude: latitude, longitude: longitude)
-        do {
-            let hourly = try await WeatherService.shared.weather(for: location, including: .hourly)
-            let closest = hourly.min { abs($0.date.timeIntervalSince(date)) < abs($1.date.timeIntervalSince(date)) }
-            if let closest, abs(closest.date.timeIntervalSince(date)) < 90 * 60 {
-                hour = closest
-            }
-        } catch {
-            // Non-fatal: the row just shows "not available yet".
+
+        if let hourly = try? await WeatherService.shared.weather(for: location, including: .hourly),
+           let closest = hourly.min(by: { abs($0.date.timeIntervalSince(date)) < abs($1.date.timeIntervalSince(date)) }),
+           abs(closest.date.timeIntervalSince(date)) < 90 * 60 {
+            hour = closest
+            return
+        }
+
+        if let daily = try? await WeatherService.shared.weather(for: location, including: .daily),
+           let matchingDay = daily.first(where: { Calendar.current.isDate($0.date, inSameDayAs: date) }) {
+            day = matchingDay
         }
     }
 }
