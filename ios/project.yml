@@ -15,6 +15,7 @@ targets:
       path: SharedCalendar/Info.plist
       properties:
         UILaunchScreen: {}
+        ITSAppUsesNonExemptEncryption: false
     entitlements:
       path: SharedCalendar/SharedCalendar.entitlements
       properties:
