@@ -33,6 +33,14 @@ const softDeleteEvent = db.prepare(`
 
 const getEvent = db.prepare("SELECT * FROM events WHERE id = ?");
 
+const getEventWithOwner = db.prepare(`
+  SELECT e.*, u.display_name AS owner_name,
+    (SELECT r.status FROM event_responses r WHERE r.event_id = e.id AND r.user_id = ?) AS my_status
+  FROM events e
+  JOIN users u ON u.id = e.owner_id
+  WHERE e.id = ? AND e.deleted_at IS NULL
+`);
+
 // Counts all events created in the window regardless of deleted_at, so
 // deleting one and recreating it can't be used to dodge the rate limit.
 const countRecentEventsByOwner = db.prepare(`
@@ -152,6 +160,17 @@ eventsRouter.get("/review", requireUser, (req, res) => {
   const viewAsMember = req.header("X-View-As") === "member";
   const effectiveRole = viewAsMember ? "basic" : req.user.role;
   res.json(listReviewForUser.all(req.user.id, effectiveRole));
+});
+
+// GET /events/:id — a single event (public, like the list) — used for
+// deep links (universal links / share) so a specific event can be
+// fetched without pulling the whole from/to range.
+eventsRouter.get("/:id", (req, res) => {
+  const event = getEventWithOwner.get(req.user?.id ?? null, req.params.id);
+  if (!event) {
+    return res.status(404).json({ error: "event not found" });
+  }
+  res.json(event);
 });
 
 // POST /events/:id/response — swipe accept/reject
