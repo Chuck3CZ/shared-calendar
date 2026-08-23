@@ -125,6 +125,22 @@ struct AppNotification: Codable, Identifiable {
     }
 }
 
+struct AdminUser: Codable, Identifiable {
+    let id: String
+    let displayName: String?
+    let role: String
+    let createdAt: String
+    let latestVerificationStatus: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case displayName = "display_name"
+        case role
+        case createdAt = "created_at"
+        case latestVerificationStatus = "latest_verification_status"
+    }
+}
+
 struct BugReportPayload: Codable {
     let description: String
     let appVersion: String?

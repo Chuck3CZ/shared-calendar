@@ -65,6 +65,12 @@ struct ProfileView: View {
                     Text("Dočasně tě to ve swipe okně vrátí do role základního uživatele, aniž bys musel přepínat účty.")
                 }
 
+                Section {
+                    NavigationLink("Správa uživatelů") {
+                        AdminUsersView()
+                    }
+                }
+
                 Section("Žádosti o ověření (\(pendingRequests.count))") {
                     if pendingRequests.isEmpty {
                         Text("Žádné čekající žádosti").foregroundStyle(.secondary)

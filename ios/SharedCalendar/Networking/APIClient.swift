@@ -173,6 +173,18 @@ final class APIClient {
         _ = try await request("bug-reports", method: "POST", body: body, optionalAuth: true)
     }
 
+    func fetchAllUsers() async throws -> [AdminUser] {
+        let data = try await request("admin/users", authenticated: true)
+        return try decoder.decode([AdminUser].self, from: data)
+    }
+
+    @discardableResult
+    func setUserRole(id: String, role: String) async throws -> AdminUser {
+        let body = try encoder.encode(["role": role])
+        let data = try await request("admin/users/\(id)/role", method: "PATCH", body: body, authenticated: true)
+        return try decoder.decode(AdminUser.self, from: data)
+    }
+
     func fetchMe() async throws -> UserProfile {
         let data = try await request("me", authenticated: true)
         return try decoder.decode(UserProfile.self, from: data)

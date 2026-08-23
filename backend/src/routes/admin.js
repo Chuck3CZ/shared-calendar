@@ -5,6 +5,19 @@ import { requireUser, requireAdmin } from "../identity.js";
 export const adminRouter = Router();
 
 const setRole = db.prepare("UPDATE users SET role = ? WHERE id = ?");
+const getUser = db.prepare("SELECT * FROM users WHERE id = ?");
+const countAdmins = db.prepare("SELECT COUNT(*) AS count FROM users WHERE role = 'admin'");
+const VALID_ROLES = ["basic", "verified", "admin"];
+
+// Every user, newest first, with their latest verification request status
+// (if any) so an admin can see who's asked and what was decided — not just
+// the ones still pending, which is all /verification-requests shows.
+const listAllUsers = db.prepare(`
+  SELECT u.*,
+    (SELECT v.status FROM verification_requests v WHERE v.user_id = u.id ORDER BY v.created_at DESC LIMIT 1) AS latest_verification_status
+  FROM users u
+  ORDER BY u.created_at DESC
+`);
 
 const listPendingVerificationRequests = db.prepare(`
   SELECT v.*, u.display_name AS user_display_name
@@ -39,6 +52,31 @@ adminRouter.post("/bootstrap", requireUser, (req, res) => {
 
   setRole.run("admin", req.user.id);
   res.json({ id: req.user.id, role: "admin" });
+});
+
+// GET /admin/users — everyone, with their role and latest verification
+// request status, so an admin can see and change who has what without
+// digging through the pending-requests queue.
+adminRouter.get("/users", requireAdmin, (req, res) => {
+  res.json(listAllUsers.all());
+});
+
+// PATCH /admin/users/:id/role — set a user's role directly.
+adminRouter.patch("/users/:id/role", requireAdmin, (req, res) => {
+  const { role } = req.body;
+  if (!VALID_ROLES.includes(role)) {
+    return res.status(400).json({ error: `role must be one of ${VALID_ROLES.join(", ")}` });
+  }
+  const user = getUser.get(req.params.id);
+  if (!user) {
+    return res.status(404).json({ error: "user not found" });
+  }
+  if (user.role === "admin" && role !== "admin" && countAdmins.get().count <= 1) {
+    return res.status(400).json({ error: "can't remove the last admin" });
+  }
+
+  setRole.run(role, user.id);
+  res.json(getUser.get(user.id));
 });
 
 // GET /admin/device-tokens — debug view for diagnosing push notification setup
