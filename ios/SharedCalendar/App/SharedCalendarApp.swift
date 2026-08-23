@@ -9,9 +9,8 @@ struct SharedCalendarApp: App {
         WindowGroup {
             ContentView()
                 .onAppear {
-                    if AuthManager.shared.isSignedIn {
-                        UIApplication.shared.registerForRemoteNotifications()
-                    }
+                    guard AuthManager.shared.isSignedIn else { return }
+                    Task { await AuthManager.shared.registerForPushNotifications() }
                 }
         }
     }

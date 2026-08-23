@@ -18,6 +18,13 @@ const setVerificationRequestStatus = db.prepare(
   "UPDATE verification_requests SET status = ? WHERE id = ?"
 );
 
+const listDeviceTokens = db.prepare(`
+  SELECT d.user_id, u.display_name, d.apns_token, d.created_at
+  FROM device_tokens d
+  JOIN users u ON u.id = d.user_id
+  ORDER BY d.created_at DESC
+`);
+
 // POST /admin/bootstrap — one-time self-promotion to admin, gated by a
 // secret only you know (set via ADMIN_BOOTSTRAP_SECRET). Meant for
 // initial setup/testing before a real admin-management UI exists.
@@ -32,6 +39,11 @@ adminRouter.post("/bootstrap", requireUser, (req, res) => {
 
   setRole.run("admin", req.user.id);
   res.json({ id: req.user.id, role: "admin" });
+});
+
+// GET /admin/device-tokens — debug view for diagnosing push notification setup
+adminRouter.get("/device-tokens", requireAdmin, (req, res) => {
+  res.json(listDeviceTokens.all());
 });
 
 // GET /admin/verification-requests — pending requests waiting on a decision

@@ -34,7 +34,11 @@ final class AuthManager: ObservableObject {
     /// once granted, triggers APNs registration. The resulting device token
     /// arrives asynchronously in AppDelegate and gets sent to the backend
     /// from there — it isn't available yet at the point this returns.
-    private func registerForPushNotifications() async {
+    /// Called after every fresh sign-in, and also on every launch while
+    /// already signed in (registerForRemoteNotifications should be called
+    /// on every launch per Apple's guidance, and an existing session from
+    /// before push support shipped never got a first chance to ask).
+    func registerForPushNotifications() async {
         let granted = (try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])) ?? false
         guard granted else { return }
         UIApplication.shared.registerForRemoteNotifications()
