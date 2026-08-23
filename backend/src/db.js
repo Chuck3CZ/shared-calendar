@@ -58,6 +58,19 @@ db.exec(`
     user_id TEXT NOT NULL REFERENCES users(id),
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
+
+  -- Replaces event_responses.notified_at: lets each attendee pick their own
+  -- reminder offset(s) per event (e.g. 2h before AND 10m before), mirroring
+  -- iOS Calendar's first/second alert.
+  CREATE TABLE IF NOT EXISTS reminder_settings (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id),
+    event_id TEXT NOT NULL REFERENCES events(id),
+    minutes_before INTEGER NOT NULL,
+    notified_at TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE (user_id, event_id, minutes_before)
+  );
 `);
 
 try {

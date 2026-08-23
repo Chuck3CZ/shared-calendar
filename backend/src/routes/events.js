@@ -6,7 +6,8 @@ import { requireUser } from "../identity.js";
 export const eventsRouter = Router();
 
 const listEvents = db.prepare(`
-  SELECT e.*, u.display_name AS owner_name
+  SELECT e.*, u.display_name AS owner_name,
+    (SELECT r.status FROM event_responses r WHERE r.event_id = e.id AND r.user_id = ?) AS my_status
   FROM events e
   JOIN users u ON u.id = e.owner_id
   WHERE e.deleted_at IS NULL AND e.start_at >= ? AND e.start_at <= ?
@@ -47,6 +48,23 @@ const upsertResponse = db.prepare(`
   DO UPDATE SET status = excluded.status, responded_at = excluded.responded_at
 `);
 
+const DEFAULT_REMINDER_MINUTES = 120;
+const ALLOWED_REMINDER_MINUTES = [0, 10, 30, 60, 120, 1440];
+const MAX_REMINDERS_PER_RESPONSE = 2;
+
+const countReminders = db.prepare(
+  "SELECT COUNT(*) AS count FROM reminder_settings WHERE user_id = ? AND event_id = ?"
+);
+const insertReminder = db.prepare(
+  "INSERT INTO reminder_settings (id, user_id, event_id, minutes_before) VALUES (?, ?, ?, ?)"
+);
+const deleteReminders = db.prepare(
+  "DELETE FROM reminder_settings WHERE user_id = ? AND event_id = ?"
+);
+const listReminders = db.prepare(
+  "SELECT minutes_before FROM reminder_settings WHERE user_id = ? AND event_id = ? ORDER BY minutes_before ASC"
+);
+
 const listPendingForUser = db.prepare(`
   SELECT e.*, u.display_name AS owner_name
   FROM events e
@@ -70,7 +88,7 @@ const listReviewForUser = db.prepare(`
 eventsRouter.get("/", (req, res) => {
   const from = req.query.from || "0000-01-01";
   const to = req.query.to || "9999-12-31";
-  res.json(listEvents.all(from, to));
+  res.json(listEvents.all(req.user?.id ?? null, from, to));
 });
 
 // GET /events/pending — cards not yet swiped by the current user
@@ -125,7 +143,52 @@ eventsRouter.post("/:id/response", requireUser, (req, res) => {
   }
 
   upsertResponse.run(req.user.id, event.id, status);
+
+  if (status === "rejected") {
+    deleteReminders.run(req.user.id, event.id);
+  } else if (countReminders.get(req.user.id, event.id).count === 0) {
+    insertReminder.run(randomUUID(), req.user.id, event.id, DEFAULT_REMINDER_MINUTES);
+  }
+
   res.json({ event_id: event.id, status });
+});
+
+// GET /events/:id/reminders — your reminder offsets for this event (empty if not attending)
+eventsRouter.get("/:id/reminders", requireUser, (req, res) => {
+  const minutes = listReminders.all(req.user.id, req.params.id).map((r) => r.minutes_before);
+  res.json({ minutes });
+});
+
+// PUT /events/:id/reminders — replace your reminder offsets for this event.
+// Mirrors iOS Calendar's first/second alert: up to two offsets, from a fixed
+// set of options surfaced in the app.
+eventsRouter.put("/:id/reminders", requireUser, (req, res) => {
+  const event = getEvent.get(req.params.id);
+  if (!event || event.deleted_at) {
+    return res.status(404).json({ error: "event not found" });
+  }
+
+  const response = db
+    .prepare("SELECT status FROM event_responses WHERE user_id = ? AND event_id = ?")
+    .get(req.user.id, event.id);
+  if (response?.status !== "accepted") {
+    return res.status(400).json({ error: "you can only set reminders for events you're attending" });
+  }
+
+  const minutes = req.body?.minutes;
+  if (!Array.isArray(minutes) || minutes.length > MAX_REMINDERS_PER_RESPONSE) {
+    return res.status(400).json({ error: `minutes must be an array of at most ${MAX_REMINDERS_PER_RESPONSE} values` });
+  }
+  const unique = [...new Set(minutes)];
+  if (unique.some((m) => !ALLOWED_REMINDER_MINUTES.includes(m))) {
+    return res.status(400).json({ error: `minutes must be one of ${ALLOWED_REMINDER_MINUTES.join(", ")}` });
+  }
+
+  deleteReminders.run(req.user.id, event.id);
+  for (const m of unique) {
+    insertReminder.run(randomUUID(), req.user.id, event.id, m);
+  }
+  res.json({ minutes: unique.sort((a, b) => a - b) });
 });
 
 // PATCH /events/:id — edit an event you own
