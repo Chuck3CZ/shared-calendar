@@ -1,4 +1,5 @@
 import SwiftUI
+import MapKit
 
 struct SwipeView: View {
     @ObservedObject private var auth = AuthManager.shared
@@ -142,8 +143,17 @@ private struct SwipeCard: View {
                 Label(location, systemImage: "mappin.and.ellipse")
                     .foregroundStyle(.secondary)
             }
+            if let latitude = event.latitude, let longitude = event.longitude {
+                let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+                Map(initialPosition: .region(MKCoordinateRegion(center: coordinate, span: MKCoordinateSpan(latitudeDelta: 0.002, longitudeDelta: 0.002)))) {
+                    Marker(event.location ?? event.title, coordinate: coordinate)
+                }
+                .frame(height: 100)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .allowsHitTesting(false)
+            }
             if let description = event.description {
-                Text(description).lineLimit(4)
+                Text(description).lineLimit(3)
             }
             Spacer()
             HStack {
