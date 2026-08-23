@@ -21,10 +21,12 @@
 		4E38A8490A6E027A5FE2CBB7 /* WidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 386D79CCC56E9EF9668E555A /* WidgetDataStore.swift */; };
 		56E3E97CD2CCD80E009859C0 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C37E27D983281FBBF91DAA4B /* CalendarView.swift */; };
 		5CAA8D645AE67F7BE1DAEE7F /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31C8451C2EAD245E8A38B3F6 /* ProfileView.swift */; };
+		6A06DD23241105CAB60532FB /* BugReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B6BD2FEC9A64C749638158 /* BugReportView.swift */; };
 		6E8FB7A4395DEACEE31652A0 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B203EF495E74B7A751A0E592 /* AuthManager.swift */; };
 		7A549F3025F08E23B8843957 /* SharedCalendarWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E17A17AD5D23F0AFD564ECE1 /* SharedCalendarWidget.swift */; };
 		80F841B80753EA4636EDAD5A /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 723295625FC5FB96C877FB13 /* WidgetKit.framework */; };
 		8991F35FB830C33D6315B0E8 /* KeychainSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FEEA6E4E83F1460F4581A23 /* KeychainSession.swift */; };
+		A665AC250102620252CEB632 /* ShakeDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2540FDFEC2B78D08113E1EF7 /* ShakeDetector.swift */; };
 		A810425834DA17BAB893E65F /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA24C6C582D3AB311CEB227 /* Event.swift */; };
 		B54C73D25A1ABC5F1CA301E1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 700397C71B485377CD667FEB /* Assets.xcassets */; };
 		CAE694D895A0C88E722EA62B /* SharedCalendarWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 97685D8A58BD608CB9604DBD /* SharedCalendarWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -61,6 +63,7 @@
 
 /* Begin PBXFileReference section */
 		1FC0097D4083EA6FECA627E7 /* SwipeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeView.swift; sourceTree = "<group>"; };
+		2540FDFEC2B78D08113E1EF7 /* ShakeDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShakeDetector.swift; sourceTree = "<group>"; };
 		28DD10DFDD09AF172D196B4C /* StaticMapPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaticMapPreview.swift; sourceTree = "<group>"; };
 		2A3CC29F4020D076D58FE4B4 /* SharedCalendar.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SharedCalendar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		31C8451C2EAD245E8A38B3F6 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
@@ -87,6 +90,7 @@
 		BF0FADD63C4F32A55F485636 /* LocationPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPickerView.swift; sourceTree = "<group>"; };
 		C2E5BF975131F6C2313DFAFA /* DeepLinkRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
 		C37E27D983281FBBF91DAA4B /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
+		C3B6BD2FEC9A64C749638158 /* BugReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BugReportView.swift; sourceTree = "<group>"; };
 		E17A17AD5D23F0AFD564ECE1 /* SharedCalendarWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCalendarWidget.swift; sourceTree = "<group>"; };
 		EDA24C6C582D3AB311CEB227 /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		F9260C584F63129AF18F79EA /* SignInPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInPromptView.swift; sourceTree = "<group>"; };
@@ -132,6 +136,7 @@
 		483B46883D54E82FF220A784 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				C3B6BD2FEC9A64C749638158 /* BugReportView.swift */,
 				C37E27D983281FBBF91DAA4B /* CalendarView.swift */,
 				BF0FADD63C4F32A55F485636 /* LocationPickerView.swift */,
 				A99B608CAAC941ABFB426701 /* NewEventView.swift */,
@@ -182,6 +187,7 @@
 				C2E5BF975131F6C2313DFAFA /* DeepLinkRouter.swift */,
 				9FEEA6E4E83F1460F4581A23 /* KeychainSession.swift */,
 				728844D0DDF6D92C842146AE /* PushTokenStore.swift */,
+				2540FDFEC2B78D08113E1EF7 /* ShakeDetector.swift */,
 				386D79CCC56E9EF9668E555A /* WidgetDataStore.swift */,
 				655C89AB68AE1A58B4072E4D /* WidgetDataStore+Events.swift */,
 			);
@@ -356,6 +362,7 @@
 				FE5AA009EA99810DA085D0AB /* APIClient.swift in Sources */,
 				EF342D719EDFE7085FF73153 /* AppDelegate.swift in Sources */,
 				6E8FB7A4395DEACEE31652A0 /* AuthManager.swift in Sources */,
+				6A06DD23241105CAB60532FB /* BugReportView.swift in Sources */,
 				56E3E97CD2CCD80E009859C0 /* CalendarView.swift in Sources */,
 				330F328FB34F0B9B868E8218 /* ContentView.swift in Sources */,
 				3C93DEE52589F720B4B165A9 /* DeepLinkRouter.swift in Sources */,
@@ -366,6 +373,7 @@
 				D2F33CEE1277A80F6BFBC77D /* NotificationHistoryView.swift in Sources */,
 				5CAA8D645AE67F7BE1DAEE7F /* ProfileView.swift in Sources */,
 				DC9DF2F1840408F78E126B61 /* PushTokenStore.swift in Sources */,
+				A665AC250102620252CEB632 /* ShakeDetector.swift in Sources */,
 				FB873270DC3F7E821943C228 /* SharedCalendarApp.swift in Sources */,
 				05642034B9444B65D43CEF2A /* SignInPromptView.swift in Sources */,
 				16674B1ACCF5A8AF7578E8B5 /* StaticMapPreview.swift in Sources */,

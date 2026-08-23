@@ -168,6 +168,11 @@ final class APIClient {
         _ = try await request("me/notifications/read", method: "POST", authenticated: true)
     }
 
+    func submitBugReport(_ payload: BugReportPayload) async throws {
+        let body = try encoder.encode(payload)
+        _ = try await request("bug-reports", method: "POST", body: body, optionalAuth: true)
+    }
+
     func fetchMe() async throws -> UserProfile {
         let data = try await request("me", authenticated: true)
         return try decoder.decode(UserProfile.self, from: data)

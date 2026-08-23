@@ -84,6 +84,8 @@ struct NewEventView: View {
             .alert(isEditing ? "Akce upravena" : "Akce vytvořena", isPresented: $didSubmit) {
                 Button("OK") { dismiss() }
             }
+            .sensoryFeedback(.success, trigger: didSubmit)
+            .sensoryFeedback(trigger: errorMessage) { _, new in new != nil ? .error : nil }
         }
     }
 

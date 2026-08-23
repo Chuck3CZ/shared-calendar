@@ -142,6 +142,7 @@ private struct SwipeCard: View {
 
     @State private var offset: CGSize = .zero
     @GestureState private var isDragging = false
+    @State private var decisionFeedback: String?
 
     private let threshold: CGFloat = 120
 
@@ -229,9 +230,14 @@ private struct SwipeCard: View {
                     }
                 }
         )
+        .sensoryFeedback(trigger: decisionFeedback) { _, newValue in
+            guard let newValue else { return nil }
+            return newValue == "accepted" ? .success : .impact(weight: .medium)
+        }
     }
 
     private func swipeAway(status: String) {
+        decisionFeedback = status
         withAnimation(.easeOut) {
             offset = CGSize(width: status == "accepted" ? 600 : -600, height: 0)
         }

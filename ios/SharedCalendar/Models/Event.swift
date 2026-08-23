@@ -125,6 +125,20 @@ struct AppNotification: Codable, Identifiable {
     }
 }
 
+struct BugReportPayload: Codable {
+    let description: String
+    let appVersion: String?
+    let osVersion: String?
+    let deviceModel: String?
+
+    enum CodingKeys: String, CodingKey {
+        case description
+        case appVersion = "app_version"
+        case osVersion = "os_version"
+        case deviceModel = "device_model"
+    }
+}
+
 struct NewEventPayload: Codable {
     let title: String
     let description: String?

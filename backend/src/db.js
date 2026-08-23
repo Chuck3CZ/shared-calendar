@@ -84,6 +84,18 @@ db.exec(`
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     read_at TEXT
   );
+
+  -- user_id is nullable: shake-to-report should work even for a signed-out
+  -- visitor hitting a bug before they've ever authenticated.
+  CREATE TABLE IF NOT EXISTS bug_reports (
+    id TEXT PRIMARY KEY,
+    user_id TEXT REFERENCES users(id),
+    description TEXT NOT NULL,
+    app_version TEXT,
+    os_version TEXT,
+    device_model TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
 `);
 
 try {

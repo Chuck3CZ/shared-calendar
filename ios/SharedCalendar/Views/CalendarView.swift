@@ -153,6 +153,7 @@ struct EventDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showingDeleteConfirm = false
     @State private var showingSlideToDelete = false
+    @State private var didDelete = false
     @State private var isDeleting = false
     @State private var errorMessage: String?
     @State private var reminderMinutes: [Int] = []
@@ -297,6 +298,7 @@ struct EventDetailView: View {
                 Text("Akce se přesune do koše.")
             }
             .task { await loadReminders() }
+            .sensoryFeedback(.warning, trigger: didDelete)
         }
     }
 
@@ -325,6 +327,7 @@ struct EventDetailView: View {
         defer { isDeleting = false }
         do {
             try await APIClient.shared.deleteEvent(id: event.id)
+            didDelete = true
             onDeleted()
             dismiss()
         } catch {

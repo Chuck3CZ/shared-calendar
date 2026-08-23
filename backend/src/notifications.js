@@ -33,6 +33,11 @@ const deleteDeviceToken = db.prepare("DELETE FROM device_tokens WHERE apns_token
 const listOtherUsersWithDevices = db.prepare(
   "SELECT DISTINCT user_id FROM device_tokens WHERE user_id != ?"
 );
+const listAdminsWithDevices = db.prepare(`
+  SELECT DISTINCT dt.user_id FROM device_tokens dt
+  JOIN users u ON u.id = dt.user_id
+  WHERE u.role = 'admin'
+`);
 const insertNotification = db.prepare(`
   INSERT INTO notifications (id, user_id, title, body, event_id) VALUES (?, ?, ?, ?, ?)
 `);
@@ -70,6 +75,12 @@ export async function notifyUser(userId, payload) {
 export async function notifyOtherUsers(excludeUserId, payload) {
   const users = listOtherUsersWithDevices.all(excludeUserId);
   for (const { user_id } of users) {
+    await notifyUser(user_id, payload);
+  }
+}
+
+export async function notifyAdmins(payload) {
+  for (const { user_id } of listAdminsWithDevices.all()) {
     await notifyUser(user_id, payload);
   }
 }
