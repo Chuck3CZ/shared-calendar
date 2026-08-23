@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreLocation
 
 struct NewEventView: View {
     var eventToEdit: Event? = nil
@@ -7,11 +8,13 @@ struct NewEventView: View {
     @State private var title = ""
     @State private var description = ""
     @State private var location = ""
+    @State private var coordinate: CLLocationCoordinate2D?
     @State private var startAt = Date()
     @State private var isSubmitting = false
     @State private var errorMessage: String?
     @State private var didSubmit = false
     @State private var didPopulate = false
+    @State private var showingLocationPicker = false
 
     private var isEditing: Bool { eventToEdit != nil }
 
@@ -21,7 +24,15 @@ struct NewEventView: View {
                 Section("Akce") {
                     TextField("Název", text: $title)
                     TextField("Popis", text: $description, axis: .vertical)
-                    TextField("Místo", text: $location)
+                    HStack {
+                        TextField("Místo", text: $location)
+                        Button {
+                            showingLocationPicker = true
+                        } label: {
+                            Image(systemName: "map")
+                        }
+                        .buttonStyle(.borderless)
+                    }
                     DatePicker("Kdy", selection: $startAt)
                 }
 
@@ -49,6 +60,12 @@ struct NewEventView: View {
                 }
             }
             .onAppear { populateIfNeeded() }
+            .sheet(isPresented: $showingLocationPicker) {
+                LocationPickerView(initialAddress: location, initialCoordinate: coordinate) { address, newCoordinate in
+                    location = address
+                    coordinate = newCoordinate
+                }
+            }
             .alert(isEditing ? "Akce upravena" : "Akce vytvořena", isPresented: $didSubmit) {
                 Button("OK") { dismiss() }
             }
@@ -61,6 +78,9 @@ struct NewEventView: View {
         title = event.title
         description = event.description ?? ""
         location = event.location ?? ""
+        if let lat = event.latitude, let lng = event.longitude {
+            coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lng)
+        }
         startAt = event.startAt
     }
 
@@ -74,7 +94,9 @@ struct NewEventView: View {
                 description: description.isEmpty ? nil : description,
                 location: location.isEmpty ? nil : location,
                 startAt: formatter.string(from: startAt),
-                endAt: nil
+                endAt: nil,
+                latitude: coordinate?.latitude,
+                longitude: coordinate?.longitude
             )
             if let event = eventToEdit {
                 _ = try await APIClient.shared.updateEvent(id: event.id, payload)

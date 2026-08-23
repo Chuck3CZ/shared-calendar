@@ -12,6 +12,8 @@ struct Event: Codable, Identifiable, Equatable {
     let createdAt: String
     /// "accepted" / "rejected" / nil (no response yet, or not signed in)
     let myStatus: String?
+    let latitude: Double?
+    let longitude: Double?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -24,6 +26,8 @@ struct Event: Codable, Identifiable, Equatable {
         case endAt = "end_at"
         case createdAt = "created_at"
         case myStatus = "my_status"
+        case latitude
+        case longitude
     }
 }
 
@@ -108,10 +112,13 @@ struct NewEventPayload: Codable {
     let location: String?
     let startAt: String
     let endAt: String?
+    let latitude: Double?
+    let longitude: Double?
 
     enum CodingKeys: String, CodingKey {
         case title, description, location
         case startAt = "start_at"
         case endAt = "end_at"
+        case latitude, longitude
     }
 }

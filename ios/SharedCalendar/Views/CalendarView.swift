@@ -1,4 +1,13 @@
 import SwiftUI
+import MapKit
+
+func openInMaps(latitude: Double, longitude: Double, name: String) {
+    let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    let placemark = MKPlacemark(coordinate: coordinate)
+    let mapItem = MKMapItem(placemark: placemark)
+    mapItem.name = name
+    mapItem.openInMaps()
+}
 
 struct CalendarView: View {
     @ObservedObject private var auth = AuthManager.shared
@@ -184,6 +193,11 @@ private struct EventDetailView: View {
                     }
                     LabeledContent("Kdy", value: event.startAt.formatted(date: .abbreviated, time: .shortened))
                     LabeledContent("Autor", value: isOwner ? "Ty" : (event.ownerName ?? "Neznámé jméno"))
+                    if let latitude = event.latitude, let longitude = event.longitude {
+                        Button("Otevřít v Mapách") {
+                            openInMaps(latitude: latitude, longitude: longitude, name: event.location ?? event.title)
+                        }
+                    }
                 }
 
                 if isAttending {

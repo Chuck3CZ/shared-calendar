@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		05642034B9444B65D43CEF2A /* SignInPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9260C584F63129AF18F79EA /* SignInPromptView.swift */; };
 		0BA6A6EECEE8BDD27D2F9AB4 /* SwipeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FC0097D4083EA6FECA627E7 /* SwipeView.swift */; };
+		2B721A0DB90FB11444E14E49 /* LocationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0FADD63C4F32A55F485636 /* LocationPickerView.swift */; };
 		330F328FB34F0B9B868E8218 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5D6AD1C0FAF961018BA7C5 /* ContentView.swift */; };
 		44A7CE0D23C68727A64033E6 /* NewEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A99B608CAAC941ABFB426701 /* NewEventView.swift */; };
 		56E3E97CD2CCD80E009859C0 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C37E27D983281FBBF91DAA4B /* CalendarView.swift */; };
@@ -38,6 +39,7 @@
 		A99B608CAAC941ABFB426701 /* NewEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewEventView.swift; sourceTree = "<group>"; };
 		B203EF495E74B7A751A0E592 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 		BBF14366458B05AAB7F3C725 /* SharedCalendar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SharedCalendar.entitlements; sourceTree = "<group>"; };
+		BF0FADD63C4F32A55F485636 /* LocationPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPickerView.swift; sourceTree = "<group>"; };
 		C37E27D983281FBBF91DAA4B /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		EDA24C6C582D3AB311CEB227 /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		F9260C584F63129AF18F79EA /* SignInPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInPromptView.swift; sourceTree = "<group>"; };
@@ -62,6 +64,7 @@
 			isa = PBXGroup;
 			children = (
 				C37E27D983281FBBF91DAA4B /* CalendarView.swift */,
+				BF0FADD63C4F32A55F485636 /* LocationPickerView.swift */,
 				A99B608CAAC941ABFB426701 /* NewEventView.swift */,
 				31C8451C2EAD245E8A38B3F6 /* ProfileView.swift */,
 				F9260C584F63129AF18F79EA /* SignInPromptView.swift */,
@@ -216,6 +219,7 @@
 				330F328FB34F0B9B868E8218 /* ContentView.swift in Sources */,
 				A810425834DA17BAB893E65F /* Event.swift in Sources */,
 				8991F35FB830C33D6315B0E8 /* KeychainSession.swift in Sources */,
+				2B721A0DB90FB11444E14E49 /* LocationPickerView.swift in Sources */,
 				44A7CE0D23C68727A64033E6 /* NewEventView.swift in Sources */,
 				5CAA8D645AE67F7BE1DAEE7F /* ProfileView.swift in Sources */,
 				DC9DF2F1840408F78E126B61 /* PushTokenStore.swift in Sources */,
