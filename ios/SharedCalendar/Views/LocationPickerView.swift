@@ -10,6 +10,7 @@ struct LocationPickerView: View {
     @State private var searchText: String
     @State private var selectedCoordinate: CLLocationCoordinate2D?
     @State private var selectedAddress: String
+    @State private var isSelectionPrecise = true
     @State private var cameraPosition: MapCameraPosition
 
     init(initialAddress: String, initialCoordinate: CLLocationCoordinate2D?, onSelect: @escaping (String, CLLocationCoordinate2D) -> Void) {
@@ -73,12 +74,18 @@ struct LocationPickerView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text(selectedAddress.isEmpty ? "Vybraná poloha" : selectedAddress)
                                 .font(.subheadline)
-                            Button("Použít tuto polohu") {
-                                onSelect(selectedAddress, selectedCoordinate)
-                                dismiss()
+                            if isSelectionPrecise {
+                                Button("Použít tuto polohu") {
+                                    onSelect(selectedAddress, selectedCoordinate)
+                                    dismiss()
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .frame(maxWidth: .infinity)
+                            } else {
+                                Text("Tohle je jen obec/oblast bez čísla popisného. Vyber přesnější místo (adresu s číslem, nebo konkrétní podnik/budovu).")
+                                    .font(.footnote)
+                                    .foregroundStyle(.red)
                             }
-                            .buttonStyle(.borderedProminent)
-                            .frame(maxWidth: .infinity)
                         }
                         .padding()
                     } else {
@@ -106,6 +113,10 @@ struct LocationPickerView: View {
         let coordinate = item.placemark.coordinate
         selectedCoordinate = coordinate
         selectedAddress = formattedAddress(from: item.placemark) ?? completion.title
+        // A bare place/locality (e.g. just "Dukovany") has no house number and
+        // isn't a point of interest either — reject it, only a specific
+        // address or a specific venue is precise enough to actually navigate to.
+        isSelectionPrecise = item.placemark.subThoroughfare != nil || item.pointOfInterestCategory != nil
         cameraPosition = .region(MKCoordinateRegion(center: coordinate, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)))
         searchText = ""
         searchCompleter.results = []
@@ -121,13 +132,15 @@ struct LocationPickerView: View {
         }
         if let placemark {
             selectedAddress = formattedAddress(from: placemark) ?? ""
+            isSelectionPrecise = placemark.subThoroughfare != nil
+        } else {
+            isSelectionPrecise = false
         }
     }
 
     private func formattedAddress(from placemark: CLPlacemark) -> String? {
         let street = [placemark.thoroughfare, placemark.subThoroughfare].compactMap { $0 }.joined(separator: " ")
-        let city = [placemark.postalCode, placemark.locality].compactMap { $0 }.joined(separator: " ")
-        let parts = [street, city].filter { !$0.isEmpty }
+        let parts = [street, placemark.locality].compactMap { $0 }.filter { !$0.isEmpty }
         return parts.isEmpty ? nil : parts.joined(separator: ", ")
     }
 }
