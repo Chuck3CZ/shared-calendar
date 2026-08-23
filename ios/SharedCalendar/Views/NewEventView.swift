@@ -24,14 +24,25 @@ struct NewEventView: View {
                 Section("Akce") {
                     TextField("Název", text: $title)
                     TextField("Popis", text: $description, axis: .vertical)
-                    HStack {
-                        TextField("Místo", text: $location)
-                        Button {
-                            showingLocationPicker = true
-                        } label: {
+                    Button {
+                        showingLocationPicker = true
+                    } label: {
+                        HStack {
+                            Text("Místo")
+                                .foregroundStyle(location.isEmpty ? .primary : .secondary)
+                            Spacer()
+                            Text(location.isEmpty ? "Vybrat na mapě" : location)
+                                .foregroundStyle(location.isEmpty ? .secondary : .primary)
+                                .multilineTextAlignment(.trailing)
                             Image(systemName: "map")
+                                .foregroundStyle(.secondary)
                         }
-                        .buttonStyle(.borderless)
+                    }
+                    if !location.isEmpty {
+                        Button("Odebrat místo", role: .destructive) {
+                            location = ""
+                            coordinate = nil
+                        }
                     }
                     DatePicker("Kdy", selection: $startAt)
                 }
