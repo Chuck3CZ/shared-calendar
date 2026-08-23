@@ -12,15 +12,22 @@
 		16674B1ACCF5A8AF7578E8B5 /* StaticMapPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28DD10DFDD09AF172D196B4C /* StaticMapPreview.swift */; };
 		2B721A0DB90FB11444E14E49 /* LocationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0FADD63C4F32A55F485636 /* LocationPickerView.swift */; };
 		330F328FB34F0B9B868E8218 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5D6AD1C0FAF961018BA7C5 /* ContentView.swift */; };
+		3752629E2BF10E3ACA078EB6 /* WidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 386D79CCC56E9EF9668E555A /* WidgetDataStore.swift */; };
+		3931C6036739D511D2DED66E /* WidgetDataStore+Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 655C89AB68AE1A58B4072E4D /* WidgetDataStore+Events.swift */; };
 		3C93DEE52589F720B4B165A9 /* DeepLinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2E5BF975131F6C2313DFAFA /* DeepLinkRouter.swift */; };
+		443193D8C272A88E2AE8DA71 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 47218B41F638F407C8BF1A9A /* SwiftUI.framework */; };
 		44A7CE0D23C68727A64033E6 /* NewEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A99B608CAAC941ABFB426701 /* NewEventView.swift */; };
 		48E708AD672029E599F0CFEA /* WeatherSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338412FE91967FCA56CDA4B2 /* WeatherSummaryView.swift */; };
+		4E38A8490A6E027A5FE2CBB7 /* WidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 386D79CCC56E9EF9668E555A /* WidgetDataStore.swift */; };
 		56E3E97CD2CCD80E009859C0 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C37E27D983281FBBF91DAA4B /* CalendarView.swift */; };
 		5CAA8D645AE67F7BE1DAEE7F /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31C8451C2EAD245E8A38B3F6 /* ProfileView.swift */; };
 		6E8FB7A4395DEACEE31652A0 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B203EF495E74B7A751A0E592 /* AuthManager.swift */; };
+		7A549F3025F08E23B8843957 /* SharedCalendarWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E17A17AD5D23F0AFD564ECE1 /* SharedCalendarWidget.swift */; };
+		80F841B80753EA4636EDAD5A /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 723295625FC5FB96C877FB13 /* WidgetKit.framework */; };
 		8991F35FB830C33D6315B0E8 /* KeychainSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FEEA6E4E83F1460F4581A23 /* KeychainSession.swift */; };
 		A810425834DA17BAB893E65F /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA24C6C582D3AB311CEB227 /* Event.swift */; };
 		B54C73D25A1ABC5F1CA301E1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 700397C71B485377CD667FEB /* Assets.xcassets */; };
+		CAE694D895A0C88E722EA62B /* SharedCalendarWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 97685D8A58BD608CB9604DBD /* SharedCalendarWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D2F33CEE1277A80F6BFBC77D /* NotificationHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 478A5291629EE57C22BBCC33 /* NotificationHistoryView.swift */; };
 		DC9DF2F1840408F78E126B61 /* PushTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 728844D0DDF6D92C842146AE /* PushTokenStore.swift */; };
 		EF342D719EDFE7085FF73153 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672655541EFC00DF92B943B6 /* AppDelegate.swift */; };
@@ -28,18 +35,49 @@
 		FE5AA009EA99810DA085D0AB /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B9A70E0AE36C2EE3ECA676B /* APIClient.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		7ED9FA0FC0CB839846649AE0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DA5E18019ADF2816DC380A64 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 08806FC2041A23677B426DD5;
+			remoteInfo = SharedCalendarWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		0CFFE338101FA7536FADF53B /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				CAE694D895A0C88E722EA62B /* SharedCalendarWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		1FC0097D4083EA6FECA627E7 /* SwipeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeView.swift; sourceTree = "<group>"; };
 		28DD10DFDD09AF172D196B4C /* StaticMapPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaticMapPreview.swift; sourceTree = "<group>"; };
 		2A3CC29F4020D076D58FE4B4 /* SharedCalendar.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SharedCalendar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		31C8451C2EAD245E8A38B3F6 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		338412FE91967FCA56CDA4B2 /* WeatherSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherSummaryView.swift; sourceTree = "<group>"; };
+		386D79CCC56E9EF9668E555A /* WidgetDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetDataStore.swift; sourceTree = "<group>"; };
+		3B1AB0E7ED9C693CFA28E2E2 /* SharedCalendarWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SharedCalendarWidget.entitlements; sourceTree = "<group>"; };
+		47218B41F638F407C8BF1A9A /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		478A5291629EE57C22BBCC33 /* NotificationHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationHistoryView.swift; sourceTree = "<group>"; };
+		655C89AB68AE1A58B4072E4D /* WidgetDataStore+Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WidgetDataStore+Events.swift"; sourceTree = "<group>"; };
 		672655541EFC00DF92B943B6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6B9A70E0AE36C2EE3ECA676B /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		700397C71B485377CD667FEB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		71B05446CC9D3AADD042FE27 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		723295625FC5FB96C877FB13 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		728844D0DDF6D92C842146AE /* PushTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushTokenStore.swift; sourceTree = "<group>"; };
 		92783EC1CEE72B6A13D18EBE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		97685D8A58BD608CB9604DBD /* SharedCalendarWidgetExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = SharedCalendarWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		9907B5FDD9F5BB072AA56D2A /* SharedCalendarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCalendarApp.swift; sourceTree = "<group>"; };
 		9A5D6AD1C0FAF961018BA7C5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		9FEEA6E4E83F1460F4581A23 /* KeychainSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainSession.swift; sourceTree = "<group>"; };
@@ -49,11 +87,34 @@
 		BF0FADD63C4F32A55F485636 /* LocationPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPickerView.swift; sourceTree = "<group>"; };
 		C2E5BF975131F6C2313DFAFA /* DeepLinkRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
 		C37E27D983281FBBF91DAA4B /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
+		E17A17AD5D23F0AFD564ECE1 /* SharedCalendarWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCalendarWidget.swift; sourceTree = "<group>"; };
 		EDA24C6C582D3AB311CEB227 /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		F9260C584F63129AF18F79EA /* SignInPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInPromptView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFrameworksBuildPhase section */
+		6AA2E68AD49C4A61692272EA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				80F841B80753EA4636EDAD5A /* WidgetKit.framework in Frameworks */,
+				443193D8C272A88E2AE8DA71 /* SwiftUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
 /* Begin PBXGroup section */
+		3BCE5B52768CD6F1B52EEA11 /* SharedCalendarWidget */ = {
+			isa = PBXGroup;
+			children = (
+				71B05446CC9D3AADD042FE27 /* Info.plist */,
+				3B1AB0E7ED9C693CFA28E2E2 /* SharedCalendarWidget.entitlements */,
+				E17A17AD5D23F0AFD564ECE1 /* SharedCalendarWidget.swift */,
+			);
+			path = SharedCalendarWidget;
+			sourceTree = "<group>";
+		};
 		402E4421A659D78486D06324 /* SharedCalendar */ = {
 			isa = PBXGroup;
 			children = (
@@ -88,6 +149,8 @@
 			isa = PBXGroup;
 			children = (
 				402E4421A659D78486D06324 /* SharedCalendar */,
+				3BCE5B52768CD6F1B52EEA11 /* SharedCalendarWidget */,
+				A57997BD2A2095BBCF613A74 /* Frameworks */,
 				D814ECCE18BD68439F82ED4F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -102,6 +165,15 @@
 			path = App;
 			sourceTree = "<group>";
 		};
+		A57997BD2A2095BBCF613A74 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				47218B41F638F407C8BF1A9A /* SwiftUI.framework */,
+				723295625FC5FB96C877FB13 /* WidgetKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		BE368672476F162625D4AF2D /* Networking */ = {
 			isa = PBXGroup;
 			children = (
@@ -110,6 +182,8 @@
 				C2E5BF975131F6C2313DFAFA /* DeepLinkRouter.swift */,
 				9FEEA6E4E83F1460F4581A23 /* KeychainSession.swift */,
 				728844D0DDF6D92C842146AE /* PushTokenStore.swift */,
+				386D79CCC56E9EF9668E555A /* WidgetDataStore.swift */,
+				655C89AB68AE1A58B4072E4D /* WidgetDataStore+Events.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -118,6 +192,7 @@
 			isa = PBXGroup;
 			children = (
 				2A3CC29F4020D076D58FE4B4 /* SharedCalendar.app */,
+				97685D8A58BD608CB9604DBD /* SharedCalendarWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -133,17 +208,38 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		08806FC2041A23677B426DD5 /* SharedCalendarWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 525F9A72E9B18CF64C8D998F /* Build configuration list for PBXNativeTarget "SharedCalendarWidgetExtension" */;
+			buildPhases = (
+				2361C445CA73A484919E1FF7 /* Sources */,
+				6AA2E68AD49C4A61692272EA /* Frameworks */,
+				3A0A7A43A8C0647210C5852E /* Stamp git commit into Info.plist */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SharedCalendarWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = SharedCalendarWidgetExtension;
+			productReference = 97685D8A58BD608CB9604DBD /* SharedCalendarWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		665020BCBE7119EA6E1AFE32 /* SharedCalendar */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = A5F521C4FDD4AC7AB4BDA9C0 /* Build configuration list for PBXNativeTarget "SharedCalendar" */;
 			buildPhases = (
 				96D383073F0542CFC8F7508B /* Sources */,
 				30F272A08F52B4BA0F5F2137 /* Resources */,
+				0CFFE338101FA7536FADF53B /* Embed Foundation Extensions */,
 				38A7D7681D5834D662FAA276 /* Stamp git commit into Info.plist */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				322FAF8CA53DC7396AE974BA /* PBXTargetDependency */,
 			);
 			name = SharedCalendar;
 			packageProductDependencies = (
@@ -161,6 +257,10 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					08806FC2041A23677B426DD5 = {
+						DevelopmentTeam = LT2EBE5TBV;
+						ProvisioningStyle = Automatic;
+					};
 					665020BCBE7119EA6E1AFE32 = {
 						DevelopmentTeam = LT2EBE5TBV;
 						ProvisioningStyle = Automatic;
@@ -182,6 +282,7 @@
 			projectRoot = "";
 			targets = (
 				665020BCBE7119EA6E1AFE32 /* SharedCalendar */,
+				08806FC2041A23677B426DD5 /* SharedCalendarWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -217,9 +318,37 @@
 			shellPath = /bin/sh;
 			shellScript = "COMMIT=$(git -C \"${SRCROOT}\" rev-parse --short HEAD 2>/dev/null || echo \"unknown\")\nCOMMIT_COUNT=$(git -C \"${SRCROOT}\" rev-list --count HEAD 2>/dev/null || echo \"0\")\nDIRTY=$(git -C \"${SRCROOT}\" status --porcelain 2>/dev/null)\nif [ -n \"$DIRTY\" ]; then COMMIT=\"${COMMIT}+\"; fi\nPLIST=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Delete :GitCommit\" \"$PLIST\" 2>/dev/null\n/usr/libexec/PlistBuddy -c \"Add :GitCommit string $COMMIT\" \"$PLIST\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $COMMIT_COUNT\" \"$PLIST\" 2>/dev/null || \\\n  /usr/libexec/PlistBuddy -c \"Add :CFBundleVersion string $COMMIT_COUNT\" \"$PLIST\"\n";
 		};
+		3A0A7A43A8C0647210C5852E /* Stamp git commit into Info.plist */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Stamp git commit into Info.plist";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "COMMIT=$(git -C \"${SRCROOT}\" rev-parse --short HEAD 2>/dev/null || echo \"unknown\")\nCOMMIT_COUNT=$(git -C \"${SRCROOT}\" rev-list --count HEAD 2>/dev/null || echo \"0\")\nDIRTY=$(git -C \"${SRCROOT}\" status --porcelain 2>/dev/null)\nif [ -n \"$DIRTY\" ]; then COMMIT=\"${COMMIT}+\"; fi\nPLIST=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Delete :GitCommit\" \"$PLIST\" 2>/dev/null\n/usr/libexec/PlistBuddy -c \"Add :GitCommit string $COMMIT\" \"$PLIST\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $COMMIT_COUNT\" \"$PLIST\" 2>/dev/null || \\\n  /usr/libexec/PlistBuddy -c \"Add :CFBundleVersion string $COMMIT_COUNT\" \"$PLIST\"\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		2361C445CA73A484919E1FF7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7A549F3025F08E23B8843957 /* SharedCalendarWidget.swift in Sources */,
+				4E38A8490A6E027A5FE2CBB7 /* WidgetDataStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		96D383073F0542CFC8F7508B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -242,10 +371,20 @@
 				16674B1ACCF5A8AF7578E8B5 /* StaticMapPreview.swift in Sources */,
 				0BA6A6EECEE8BDD27D2F9AB4 /* SwipeView.swift in Sources */,
 				48E708AD672029E599F0CFEA /* WeatherSummaryView.swift in Sources */,
+				3931C6036739D511D2DED66E /* WidgetDataStore+Events.swift in Sources */,
+				3752629E2BF10E3ACA078EB6 /* WidgetDataStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		322FAF8CA53DC7396AE974BA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 08806FC2041A23677B426DD5 /* SharedCalendarWidgetExtension */;
+			targetProxy = 7ED9FA0FC0CB839846649AE0 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		53D7D02A38CE09C1FD7254AE /* Release */ = {
@@ -389,6 +528,26 @@
 			};
 			name = Debug;
 		};
+		CAFE46D35EA2AC0D6A88D1B7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = SharedCalendarWidget/SharedCalendarWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = LT2EBE5TBV;
+				INFOPLIST_FILE = SharedCalendarWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = cz.gabrhelovi.sharedcalendar.widget;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
 		E4D16083B6DAEA781EA87DBE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -409,9 +568,38 @@
 			};
 			name = Debug;
 		};
+		FCC534462CF6CBBDBDA3919F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = SharedCalendarWidget/SharedCalendarWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = LT2EBE5TBV;
+				INFOPLIST_FILE = SharedCalendarWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = cz.gabrhelovi.sharedcalendar.widget;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		525F9A72E9B18CF64C8D998F /* Build configuration list for PBXNativeTarget "SharedCalendarWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CAFE46D35EA2AC0D6A88D1B7 /* Debug */,
+				FCC534462CF6CBBDBDA3919F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		85798806A3CA8C01E2AE6640 /* Build configuration list for PBXProject "SharedCalendar" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

@@ -24,6 +24,8 @@ targets:
         com.apple.developer.weatherkit: true
         com.apple.developer.associated-domains:
           - applinks:sc.gabrhelovi.cz
+        com.apple.security.application-groups:
+          - group.cz.gabrhelovi.sharedcalendar
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: cz.gabrhelovi.sharedcalendar
@@ -32,6 +34,51 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         DEVELOPMENT_TEAM: LT2EBE5TBV
         CODE_SIGN_STYLE: Automatic
+    dependencies:
+      - target: SharedCalendarWidgetExtension
+        embed: true
+    postbuildScripts:
+      - name: Stamp git commit into Info.plist
+        basedOnDependencyAnalysis: false
+        script: |
+          COMMIT=$(git -C "${SRCROOT}" rev-parse --short HEAD 2>/dev/null || echo "unknown")
+          COMMIT_COUNT=$(git -C "${SRCROOT}" rev-list --count HEAD 2>/dev/null || echo "0")
+          DIRTY=$(git -C "${SRCROOT}" status --porcelain 2>/dev/null)
+          if [ -n "$DIRTY" ]; then COMMIT="${COMMIT}+"; fi
+          PLIST="${TARGET_BUILD_DIR}/${INFOPLIST_PATH}"
+          /usr/libexec/PlistBuddy -c "Delete :GitCommit" "$PLIST" 2>/dev/null
+          /usr/libexec/PlistBuddy -c "Add :GitCommit string $COMMIT" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $COMMIT_COUNT" "$PLIST" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $COMMIT_COUNT" "$PLIST"
+
+  SharedCalendarWidgetExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: SharedCalendarWidget
+      - path: SharedCalendar/Networking/WidgetDataStore.swift
+    info:
+      path: SharedCalendarWidget/Info.plist
+      properties:
+        CFBundleDisplayName: SharedCalendar Widget
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: SharedCalendarWidget/SharedCalendarWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.cz.gabrhelovi.sharedcalendar
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: cz.gabrhelovi.sharedcalendar.widget
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        DEVELOPMENT_TEAM: LT2EBE5TBV
+        CODE_SIGN_STYLE: Automatic
+        SKIP_INSTALL: false
+    dependencies:
+      - sdk: WidgetKit.framework
+      - sdk: SwiftUI.framework
     postbuildScripts:
       - name: Stamp git commit into Info.plist
         basedOnDependencyAnalysis: false

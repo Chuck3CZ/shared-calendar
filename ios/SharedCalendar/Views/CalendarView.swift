@@ -136,6 +136,7 @@ struct CalendarView: View {
             let to = calendar.date(byAdding: .month, value: 3, to: Date()) ?? Date()
             events = try await APIClient.shared.fetchEvents(from: from, to: to)
             errorMessage = nil
+            WidgetDataStore.update(from: events)
         } catch {
             guard !error.isCancellation else { return }
             errorMessage = "Nepodařilo se načíst akce: \(error.localizedDescription)"

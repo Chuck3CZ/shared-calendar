@@ -51,6 +51,7 @@ final class AuthManager: ObservableObject {
         }
         KeychainSession.clear()
         session = nil
+        WidgetDataStore.clear()
         Task { try? await UNUserNotificationCenter.current().setBadgeCount(0) }
     }
 
