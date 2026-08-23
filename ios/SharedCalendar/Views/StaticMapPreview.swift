@@ -7,8 +7,15 @@ import UIKit
 /// its own continuous rendering/compositing loop even when non-interactive,
 /// which is expensive when several are on screen at once (e.g. the whole
 /// swipe stack rendering simultaneously) — a static snapshot renders once
-/// and just costs a normal image from then on. The `.task(id:)` only
-/// re-renders when the coordinate actually changes.
+/// and just costs a normal image from then on.
+///
+/// The snapshot is rendered at the width GeometryReader actually reports
+/// (not a hardcoded pixel width) and displayed at an exact frame — using
+/// `aspectRatio(contentMode: .fill)` without pinning both dimensions lets
+/// the image report an oversized *ideal* width to its parent (that's what
+/// "fill" means: overflow rather than leave gaps), which balloons the
+/// whole card past the screen edge. Only `height` should ever change how
+/// big this looks; width always matches whatever space it's given.
 struct StaticMapPreview: View {
     let latitude: Double
     let longitude: Double
@@ -23,30 +30,35 @@ struct StaticMapPreview: View {
     }
 
     var body: some View {
-        Group {
-            if let image {
-                Image(uiImage: image)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            } else {
-                Rectangle().fill(.secondary.opacity(0.15))
+        GeometryReader { proxy in
+            Group {
+                if let image {
+                    Image(uiImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: proxy.size.width, height: proxy.size.height)
+                        .clipped()
+                } else {
+                    Rectangle().fill(.secondary.opacity(0.15))
+                }
+            }
+            .task(id: "\(latitude),\(longitude),\(spanDelta),\(Int(proxy.size.width))") {
+                await renderSnapshot(width: proxy.size.width)
             }
         }
         .frame(height: height)
-        .frame(maxWidth: .infinity)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .task(id: "\(latitude),\(longitude),\(spanDelta)") {
-            await renderSnapshot()
-        }
     }
 
-    private func renderSnapshot() async {
+    private func renderSnapshot(width: CGFloat) async {
+        guard width > 0 else { return }
+
         let options = MKMapSnapshotter.Options()
         options.region = MKCoordinateRegion(
             center: coordinate,
             span: MKCoordinateSpan(latitudeDelta: spanDelta, longitudeDelta: spanDelta)
         )
-        options.size = CGSize(width: 400, height: height)
+        options.size = CGSize(width: width, height: height)
         options.scale = 2
         options.showsBuildings = true
 
