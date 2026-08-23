@@ -78,3 +78,15 @@ try {
 } catch {
   // column already exists
 }
+
+try {
+  db.exec("ALTER TABLE events ADD COLUMN latitude REAL");
+} catch {
+  // column already exists
+}
+
+try {
+  db.exec("ALTER TABLE events ADD COLUMN longitude REAL");
+} catch {
+  // column already exists
+}

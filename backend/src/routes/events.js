@@ -15,12 +15,12 @@ const listEvents = db.prepare(`
 `);
 
 const insertEvent = db.prepare(`
-  INSERT INTO events (id, owner_id, title, description, location, start_at, end_at)
-  VALUES (?, ?, ?, ?, ?, ?, ?)
+  INSERT INTO events (id, owner_id, title, description, location, start_at, end_at, latitude, longitude)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 
 const updateEvent = db.prepare(`
-  UPDATE events SET title = ?, description = ?, location = ?, start_at = ?, end_at = ?
+  UPDATE events SET title = ?, description = ?, location = ?, start_at = ?, end_at = ?, latitude = ?, longitude = ?
   WHERE id = ? AND owner_id = ?
 `);
 
@@ -102,7 +102,7 @@ eventsRouter.get("/pending", requireUser, (req, res) => {
 
 // POST /events — create an event (requires identity)
 eventsRouter.post("/", requireUser, (req, res) => {
-  const { title, description, location, start_at, end_at } = req.body;
+  const { title, description, location, start_at, end_at, latitude, longitude } = req.body;
   if (!title || !start_at) {
     return res.status(400).json({ error: "title and start_at are required" });
   }
@@ -118,7 +118,10 @@ eventsRouter.post("/", requireUser, (req, res) => {
   }
 
   const id = randomUUID();
-  insertEvent.run(id, req.user.id, title, description ?? null, location ?? null, start_at, end_at ?? null);
+  insertEvent.run(
+    id, req.user.id, title, description ?? null, location ?? null, start_at, end_at ?? null,
+    latitude ?? null, longitude ?? null
+  );
   res.status(201).json(getEvent.get(id));
 });
 
@@ -201,12 +204,15 @@ eventsRouter.patch("/:id", requireUser, (req, res) => {
     return res.status(403).json({ error: "you can only edit your own events" });
   }
 
-  const { title, description, location, start_at, end_at } = req.body;
+  const { title, description, location, start_at, end_at, latitude, longitude } = req.body;
   if (!title || !start_at) {
     return res.status(400).json({ error: "title and start_at are required" });
   }
 
-  updateEvent.run(title, description ?? null, location ?? null, start_at, end_at ?? null, event.id, req.user.id);
+  updateEvent.run(
+    title, description ?? null, location ?? null, start_at, end_at ?? null,
+    latitude ?? null, longitude ?? null, event.id, req.user.id
+  );
   res.json(getEvent.get(event.id));
 });
 
