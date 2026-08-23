@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct ContentView: View {
+    @ObservedObject private var deepLinkRouter = DeepLinkRouter.shared
+
     var body: some View {
         TabView {
             CalendarView()
@@ -11,6 +13,9 @@ struct ContentView: View {
 
             ProfileView()
                 .tabItem { Label("Profil", systemImage: "person.circle") }
+        }
+        .sheet(item: $deepLinkRouter.pendingEvent) { event in
+            EventDetailView(event: event)
         }
     }
 }

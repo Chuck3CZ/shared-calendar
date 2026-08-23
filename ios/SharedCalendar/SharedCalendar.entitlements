@@ -8,6 +8,10 @@
 	<array>
 		<string>Default</string>
 	</array>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:sc.gabrhelovi.cz</string>
+	</array>
 	<key>com.apple.developer.weatherkit</key>
 	<true/>
 </dict>

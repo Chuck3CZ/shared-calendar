@@ -131,6 +131,11 @@ final class APIClient {
         _ = try await request("admin/verification-requests/\(id)/reject", method: "POST", authenticated: true)
     }
 
+    func fetchEvent(id: String) async throws -> Event {
+        let data = try await request("events/\(id)", optionalAuth: true)
+        return try decoder.decode(Event.self, from: data)
+    }
+
     func fetchEvents(from: Date, to: Date) async throws -> [Event] {
         let formatter = ISO8601DateFormatter()
         let queryItems = [

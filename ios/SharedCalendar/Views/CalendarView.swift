@@ -129,10 +129,10 @@ struct CalendarView: View {
     }
 }
 
-private struct EventDetailView: View {
+struct EventDetailView: View {
     let event: Event
-    let onEdit: () -> Void
-    let onDeleted: () -> Void
+    var onEdit: () -> Void = {}
+    var onDeleted: () -> Void = {}
 
     @ObservedObject private var auth = AuthManager.shared
     @Environment(\.dismiss) private var dismiss
@@ -146,15 +146,10 @@ private struct EventDetailView: View {
     private var isAdmin: Bool { auth.session?.profile.role == "admin" }
     private var isAttending: Bool { event.myStatus == "accepted" }
 
-    private var shareText: String {
-        var lines = [event.title, event.startAt.formatted(date: .abbreviated, time: .shortened)]
-        if let location = event.location, !location.isEmpty {
-            lines.append(location)
-        }
-        if let description = event.description, !description.isEmpty {
-            lines.append(description)
-        }
-        return lines.joined(separator: "\n")
+    /// A universal link — opens straight to this event's detail in the app
+    /// for anyone who has it installed, or a plain web page otherwise.
+    private var shareURL: URL {
+        APIClient.shared.baseURL.appendingPathComponent("event").appendingPathComponent(event.id)
     }
 
     private static let reminderOptions: [(label: String, minutes: Int)] = [
@@ -273,7 +268,7 @@ private struct EventDetailView: View {
                     Button("Zavřít") { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    ShareLink(item: shareText) {
+                    ShareLink(item: shareURL, subject: Text(event.title)) {
                         Image(systemName: "square.and.arrow.up")
                     }
                 }

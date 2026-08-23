@@ -12,6 +12,9 @@ struct SharedCalendarApp: App {
                     guard AuthManager.shared.isSignedIn else { return }
                     Task { await AuthManager.shared.registerForPushNotifications() }
                 }
+                .onOpenURL { url in
+                    DeepLinkRouter.shared.handle(url: url)
+                }
         }
     }
 }

@@ -22,6 +22,8 @@ targets:
           - Default
         aps-environment: development
         com.apple.developer.weatherkit: true
+        com.apple.developer.associated-domains:
+          - applinks:sc.gabrhelovi.cz
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: cz.gabrhelovi.sharedcalendar
