@@ -169,15 +169,38 @@ private struct SwipeCard: View {
             }
             Spacer()
             HStack {
-                Text("Odmítnout").foregroundStyle(.red)
+                Button {
+                    swipeAway(status: "rejected")
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.left")
+                        Text("Odmítnout")
+                    }
+                }
+                .foregroundStyle(.red)
+
                 Spacer()
-                Text("Zajímá mě").foregroundStyle(.green)
+
+                Button {
+                    swipeAway(status: "accepted")
+                } label: {
+                    HStack(spacing: 4) {
+                        Text("Zajímá mě")
+                        Image(systemName: "arrow.right")
+                    }
+                }
+                .foregroundStyle(.green)
             }
+            .buttonStyle(.plain)
             .font(.caption.bold())
         }
         .padding(24)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.background, in: RoundedRectangle(cornerRadius: 24))
+        .overlay(
+            RoundedRectangle(cornerRadius: 24)
+                .strokeBorder(Color.primary.opacity(0.15), lineWidth: 1.5)
+        )
         .shadow(radius: 8)
         .overlay(alignment: offset.width > 0 ? .topLeading : .topTrailing) {
             if abs(offset.width) > 20 {
