@@ -56,7 +56,7 @@ final class AuthManager: ObservableObject {
     /// Re-fetches the profile (role may have changed, e.g. a verification
     /// request got approved) and keeps the Keychain copy in sync.
     func refreshProfile() async {
-        guard let current = session, let profile = try? await APIClient.shared.fetchMe() else { return }
+        guard session != nil, let profile = try? await APIClient.shared.fetchMe() else { return }
         apply(profile)
     }
 
