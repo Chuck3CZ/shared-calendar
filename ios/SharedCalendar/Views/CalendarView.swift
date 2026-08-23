@@ -146,6 +146,17 @@ private struct EventDetailView: View {
     private var isAdmin: Bool { auth.session?.profile.role == "admin" }
     private var isAttending: Bool { event.myStatus == "accepted" }
 
+    private var shareText: String {
+        var lines = [event.title, event.startAt.formatted(date: .abbreviated, time: .shortened)]
+        if let location = event.location, !location.isEmpty {
+            lines.append(location)
+        }
+        if let description = event.description, !description.isEmpty {
+            lines.append(description)
+        }
+        return lines.joined(separator: "\n")
+    }
+
     private static let reminderOptions: [(label: String, minutes: Int)] = [
         ("V čas akce", 0),
         ("10 minut předem", 10),
@@ -260,6 +271,11 @@ private struct EventDetailView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Zavřít") { dismiss() }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    ShareLink(item: shareText) {
+                        Image(systemName: "square.and.arrow.up")
+                    }
                 }
             }
             .alert("Opravdu chcete smazat?", isPresented: $showingDeleteConfirm) {
