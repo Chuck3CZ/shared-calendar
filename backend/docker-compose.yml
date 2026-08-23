@@ -7,8 +7,13 @@ services:
     environment:
       - ADMIN_BOOTSTRAP_SECRET=${ADMIN_BOOTSTRAP_SECRET}
       - APPLE_BUNDLE_ID=${APPLE_BUNDLE_ID}
+      - APNS_KEY_ID=${APNS_KEY_ID}
+      - APNS_TEAM_ID=${APNS_TEAM_ID}
+      - APNS_PRODUCTION=${APNS_PRODUCTION}
+      - APNS_KEY_PATH=/secrets/apns_key.p8
     volumes:
       - ./data:/data
+      - ./apns_key.p8:/secrets/apns_key.p8:ro
 
   cloudflared:
     image: cloudflare/cloudflared:latest

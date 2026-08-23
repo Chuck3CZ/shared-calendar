@@ -4,6 +4,7 @@ import { eventsRouter } from "./routes/events.js";
 import { adminRouter } from "./routes/admin.js";
 import { meRouter } from "./routes/me.js";
 import { authRouter } from "./routes/auth.js";
+import { startNotificationScheduler } from "./notifications.js";
 
 const app = express();
 app.use(express.json());
@@ -17,3 +18,4 @@ app.use("/auth", authRouter);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`shared-calendar backend listening on :${port}`));
+startNotificationScheduler();

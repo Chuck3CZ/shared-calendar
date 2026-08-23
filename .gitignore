@@ -1,6 +1,8 @@
 node_modules/
 backend/data/
 backend/.env
+backend/apns_key.p8
+*.p8
 *.db
 *.db-shm
 *.db-wal

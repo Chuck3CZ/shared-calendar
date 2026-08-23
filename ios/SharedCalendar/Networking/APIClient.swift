@@ -148,6 +148,11 @@ final class APIClient {
         return try decoder.decode(UserProfile.self, from: data)
     }
 
+    func registerDeviceToken(_ token: String) async throws {
+        let body = try encoder.encode(["token": token])
+        _ = try await request("me/device-token", method: "POST", body: body, authenticated: true)
+    }
+
     func fetchCreatedByMe() async throws -> [Event] {
         let data = try await request("me/created", authenticated: true)
         return try decoder.decode([Event].self, from: data)

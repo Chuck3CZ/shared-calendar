@@ -12,6 +12,14 @@ const insertVerificationRequest = db.prepare(`
   INSERT INTO verification_requests (id, user_id, reason) VALUES (?, ?, ?)
 `);
 
+const upsertDeviceToken = db.prepare(`
+  INSERT INTO device_tokens (user_id, apns_token) VALUES (?, ?)
+  ON CONFLICT (user_id, apns_token) DO NOTHING
+`);
+const deleteDeviceToken = db.prepare(
+  "DELETE FROM device_tokens WHERE user_id = ? AND apns_token = ?"
+);
+
 const listCreatedByUser = db.prepare(`
   SELECT e.*
   FROM events e
@@ -30,6 +38,26 @@ const listResponsesForUser = db.prepare(`
 
 meRouter.get("/", requireUser, (req, res) => {
   res.json(req.user);
+});
+
+// POST /me/device-token — register this device for push notifications.
+meRouter.post("/device-token", requireUser, (req, res) => {
+  const token = req.body?.token;
+  if (!token) {
+    return res.status(400).json({ error: "token is required" });
+  }
+  upsertDeviceToken.run(req.user.id, token);
+  res.status(204).end();
+});
+
+// DELETE /me/device-token — stop notifying this device (e.g. on sign out).
+meRouter.delete("/device-token", requireUser, (req, res) => {
+  const token = req.body?.token;
+  if (!token) {
+    return res.status(400).json({ error: "token is required" });
+  }
+  deleteDeviceToken.run(req.user.id, token);
+  res.status(204).end();
 });
 
 meRouter.get("/created", requireUser, (req, res) => {

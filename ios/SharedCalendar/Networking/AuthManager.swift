@@ -1,4 +1,6 @@
 import Foundation
+import UIKit
+import UserNotifications
 
 @MainActor
 final class AuthManager: ObservableObject {
@@ -22,6 +24,20 @@ final class AuthManager: ObservableObject {
         let info = SessionInfo(token: response.token, profile: response.user)
         KeychainSession.save(info)
         session = info
+        if let existingToken = PushTokenStore.current {
+            try? await APIClient.shared.registerDeviceToken(existingToken)
+        }
+        await registerForPushNotifications()
+    }
+
+    /// Asks for notification permission (a no-op if already answered) and,
+    /// once granted, triggers APNs registration. The resulting device token
+    /// arrives asynchronously in AppDelegate and gets sent to the backend
+    /// from there — it isn't available yet at the point this returns.
+    private func registerForPushNotifications() async {
+        let granted = (try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])) ?? false
+        guard granted else { return }
+        UIApplication.shared.registerForRemoteNotifications()
     }
 
     func signOut() {
