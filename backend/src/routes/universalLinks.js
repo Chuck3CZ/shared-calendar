@@ -18,7 +18,7 @@ universalLinksRouter.get("/.well-known/apple-app-site-association", (req, res) =
       apps: [],
       details: [
         {
-          appID: `${process.env.APPLE_TEAM_ID}.${process.env.APPLE_BUNDLE_ID}`,
+          appID: `${process.env.APNS_TEAM_ID}.${process.env.APPLE_BUNDLE_ID}`,
           paths: ["/event/*"],
         },
       ],
