@@ -20,6 +20,12 @@ struct CalendarView: View {
     @State private var editingEvent: Event?
     @State private var detailEvent: Event?
     @AppStorage("viewAsMember") private var viewAsMember = false
+    @Environment(\.scenePhase) private var scenePhase
+    // The graphical DatePicker (backed by UICalendarView) has a known bug
+    // where a day's number can render blank after the app returns from the
+    // background, only fixing itself once that cell is interacted with.
+    // Forcing SwiftUI to recreate it on foreground works around that.
+    @State private var datePickerRefreshID = UUID()
 
     private var eventsForSelectedDay: [Event] {
         events
@@ -33,6 +39,7 @@ struct CalendarView: View {
                 DatePicker("Datum", selection: $selectedDate, displayedComponents: .date)
                     .datePickerStyle(.graphical)
                     .padding(.horizontal)
+                    .id(datePickerRefreshID)
 
                 List {
                     if let errorMessage {
@@ -124,6 +131,10 @@ struct CalendarView: View {
             }
             .task { await load() }
             .refreshable { await load() }
+            .onChange(of: scenePhase) { _, newPhase in
+                guard newPhase == .active else { return }
+                datePickerRefreshID = UUID()
+            }
         }
     }
 
