@@ -195,7 +195,7 @@ private struct EventDetailView: View {
                     LabeledContent("Autor", value: isOwner ? "Ty" : (event.ownerName ?? "Neznámé jméno"))
                     if let latitude = event.latitude, let longitude = event.longitude {
                         let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-                        Map(initialPosition: .region(MKCoordinateRegion(center: coordinate, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)))) {
+                        Map(initialPosition: .region(MKCoordinateRegion(center: coordinate, span: MKCoordinateSpan(latitudeDelta: 0.002, longitudeDelta: 0.002)))) {
                             Marker(event.location ?? event.title, coordinate: coordinate)
                         }
                         .frame(height: 150)
