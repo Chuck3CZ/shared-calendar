@@ -100,11 +100,21 @@ eventsRouter.get("/pending", requireUser, (req, res) => {
   res.json(listPendingForUser.all(req.user.id, req.user.id, effectiveRole));
 });
 
+// A location must come from the map picker (which always attaches
+// coordinates) rather than be freely typed — keeps addresses accurate
+// enough to actually navigate to and to show weather for.
+function locationNeedsCoordinates(location, latitude, longitude) {
+  return location && (latitude == null || longitude == null);
+}
+
 // POST /events — create an event (requires identity)
 eventsRouter.post("/", requireUser, (req, res) => {
   const { title, description, location, start_at, end_at, latitude, longitude } = req.body;
   if (!title || !start_at) {
     return res.status(400).json({ error: "title and start_at are required" });
+  }
+  if (locationNeedsCoordinates(location, latitude, longitude)) {
+    return res.status(400).json({ error: "location must be picked from the map so it has coordinates" });
   }
 
   if (req.user.role === "basic") {
@@ -207,6 +217,9 @@ eventsRouter.patch("/:id", requireUser, (req, res) => {
   const { title, description, location, start_at, end_at, latitude, longitude } = req.body;
   if (!title || !start_at) {
     return res.status(400).json({ error: "title and start_at are required" });
+  }
+  if (locationNeedsCoordinates(location, latitude, longitude)) {
+    return res.status(400).json({ error: "location must be picked from the map so it has coordinates" });
   }
 
   updateEvent.run(
