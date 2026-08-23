@@ -21,6 +21,7 @@ targets:
         com.apple.developer.applesignin:
           - Default
         aps-environment: development
+        com.apple.developer.weatherkit: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: cz.gabrhelovi.sharedcalendar

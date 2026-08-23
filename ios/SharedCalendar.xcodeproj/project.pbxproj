@@ -12,6 +12,7 @@
 		2B721A0DB90FB11444E14E49 /* LocationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0FADD63C4F32A55F485636 /* LocationPickerView.swift */; };
 		330F328FB34F0B9B868E8218 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5D6AD1C0FAF961018BA7C5 /* ContentView.swift */; };
 		44A7CE0D23C68727A64033E6 /* NewEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A99B608CAAC941ABFB426701 /* NewEventView.swift */; };
+		48E708AD672029E599F0CFEA /* WeatherSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338412FE91967FCA56CDA4B2 /* WeatherSummaryView.swift */; };
 		56E3E97CD2CCD80E009859C0 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C37E27D983281FBBF91DAA4B /* CalendarView.swift */; };
 		5CAA8D645AE67F7BE1DAEE7F /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31C8451C2EAD245E8A38B3F6 /* ProfileView.swift */; };
 		6E8FB7A4395DEACEE31652A0 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B203EF495E74B7A751A0E592 /* AuthManager.swift */; };
@@ -28,6 +29,7 @@
 		1FC0097D4083EA6FECA627E7 /* SwipeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeView.swift; sourceTree = "<group>"; };
 		2A3CC29F4020D076D58FE4B4 /* SharedCalendar.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SharedCalendar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		31C8451C2EAD245E8A38B3F6 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		338412FE91967FCA56CDA4B2 /* WeatherSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherSummaryView.swift; sourceTree = "<group>"; };
 		672655541EFC00DF92B943B6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6B9A70E0AE36C2EE3ECA676B /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		700397C71B485377CD667FEB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -69,6 +71,7 @@
 				31C8451C2EAD245E8A38B3F6 /* ProfileView.swift */,
 				F9260C584F63129AF18F79EA /* SignInPromptView.swift */,
 				1FC0097D4083EA6FECA627E7 /* SwipeView.swift */,
+				338412FE91967FCA56CDA4B2 /* WeatherSummaryView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -226,6 +229,7 @@
 				FB873270DC3F7E821943C228 /* SharedCalendarApp.swift in Sources */,
 				05642034B9444B65D43CEF2A /* SignInPromptView.swift in Sources */,
 				0BA6A6EECEE8BDD27D2F9AB4 /* SwipeView.swift in Sources */,
+				48E708AD672029E599F0CFEA /* WeatherSummaryView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

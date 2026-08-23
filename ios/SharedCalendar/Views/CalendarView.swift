@@ -194,6 +194,7 @@ private struct EventDetailView: View {
                     LabeledContent("Kdy", value: event.startAt.formatted(date: .abbreviated, time: .shortened))
                     LabeledContent("Autor", value: isOwner ? "Ty" : (event.ownerName ?? "Neznámé jméno"))
                     if let latitude = event.latitude, let longitude = event.longitude {
+                        WeatherSummaryView(latitude: latitude, longitude: longitude, date: event.startAt)
                         Button("Otevřít v Mapách") {
                             openInMaps(latitude: latitude, longitude: longitude, name: event.location ?? event.title)
                         }
