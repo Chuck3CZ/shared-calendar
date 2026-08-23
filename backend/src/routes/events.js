@@ -2,6 +2,7 @@ import { Router } from "express";
 import { randomUUID } from "node:crypto";
 import { db } from "../db.js";
 import { requireUser } from "../identity.js";
+import { notifyUser, notifyOtherUsers } from "../notifications.js";
 
 export const eventsRouter = Router();
 
@@ -63,6 +64,9 @@ const deleteReminders = db.prepare(
 );
 const listReminders = db.prepare(
   "SELECT minutes_before FROM reminder_settings WHERE user_id = ? AND event_id = ? ORDER BY minutes_before ASC"
+);
+const listAcceptedAttendees = db.prepare(
+  "SELECT user_id FROM event_responses WHERE event_id = ? AND status = 'accepted' AND user_id != ?"
 );
 
 const listPendingForUser = db.prepare(`
@@ -132,6 +136,13 @@ eventsRouter.post("/", requireUser, (req, res) => {
     id, req.user.id, title, description ?? null, location ?? null, start_at, end_at ?? null,
     latitude ?? null, longitude ?? null
   );
+
+  notifyOtherUsers(req.user.id, {
+    title: "Nová akce",
+    body: location ? `${title} — ${location}` : title,
+    data: { event_id: id },
+  }).catch((error) => console.error("new-event push failed:", error));
+
   res.status(201).json(getEvent.get(id));
 });
 
@@ -226,6 +237,15 @@ eventsRouter.patch("/:id", requireUser, (req, res) => {
     title, description ?? null, location ?? null, start_at, end_at ?? null,
     latitude ?? null, longitude ?? null, event.id, req.user.id
   );
+
+  for (const { user_id } of listAcceptedAttendees.all(event.id, req.user.id)) {
+    notifyUser(user_id, {
+      title: "Akce upravena",
+      body: `${title} — zkontroluj si detaily`,
+      data: { event_id: event.id },
+    }).catch((error) => console.error("edit-event push failed:", error));
+  }
+
   res.json(getEvent.get(event.id));
 });
 

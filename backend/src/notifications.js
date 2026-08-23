@@ -29,6 +29,32 @@ const markNotified = db.prepare("UPDATE reminder_settings SET notified_at = date
 
 const listDeviceTokensForUser = db.prepare("SELECT apns_token FROM device_tokens WHERE user_id = ?");
 const deleteDeviceToken = db.prepare("DELETE FROM device_tokens WHERE apns_token = ?");
+const listOtherUsersWithDevices = db.prepare(
+  "SELECT DISTINCT user_id FROM device_tokens WHERE user_id != ?"
+);
+
+// Shared by the reminder cron below and by events.js for "new event" /
+// "an event you're attending changed" pushes. Fire-and-forget from routes
+// (don't await in the request path) — a slow or failed push shouldn't hold
+// up the HTTP response.
+export async function notifyUser(userId, payload) {
+  const tokens = listDeviceTokensForUser.all(userId);
+  for (const { apns_token } of tokens) {
+    const result = await sendPush(apns_token, payload);
+    if (result.shouldRemoveToken) {
+      deleteDeviceToken.run(apns_token);
+    } else if (!result.ok) {
+      console.error(`push to user ${userId} failed:`, result.error);
+    }
+  }
+}
+
+export async function notifyOtherUsers(excludeUserId, payload) {
+  const users = listOtherUsersWithDevices.all(excludeUserId);
+  for (const { user_id } of users) {
+    await notifyUser(user_id, payload);
+  }
+}
 
 function titleFor(minutesBefore) {
   if (minutesBefore === 0) return "Právě teď";
@@ -47,19 +73,11 @@ export async function checkAndSendReminders() {
   });
 
   for (const reminder of due) {
-    const tokens = listDeviceTokensForUser.all(reminder.user_id);
-    for (const { apns_token } of tokens) {
-      const result = await sendPush(apns_token, {
-        title: titleFor(reminder.minutes_before),
-        body: reminder.location ? `${reminder.title} — ${reminder.location}` : reminder.title,
-        data: { event_id: reminder.event_id },
-      });
-      if (result.shouldRemoveToken) {
-        deleteDeviceToken.run(apns_token);
-      } else if (!result.ok) {
-        console.error(`push to user ${reminder.user_id} failed:`, result.error);
-      }
-    }
+    await notifyUser(reminder.user_id, {
+      title: titleFor(reminder.minutes_before),
+      body: reminder.location ? `${reminder.title} — ${reminder.location}` : reminder.title,
+      data: { event_id: reminder.event_id },
+    });
     // Marked even with zero registered devices — otherwise a user who
     // never enabled notifications would get re-checked every minute forever.
     markNotified.run(reminder.id);
