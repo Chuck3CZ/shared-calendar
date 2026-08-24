@@ -169,6 +169,32 @@ struct BugReport: Codable, Identifiable {
     }
 }
 
+struct EventReportPayload: Codable {
+    let reason: String
+}
+
+struct EventReport: Codable, Identifiable {
+    let id: String
+    let eventId: String
+    let reporterId: String?
+    let reporterDisplayName: String?
+    let eventTitle: String
+    let eventDeletedAt: String?
+    let reason: String
+    let createdAt: String
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case eventId = "event_id"
+        case reporterId = "reporter_id"
+        case reporterDisplayName = "reporter_display_name"
+        case eventTitle = "event_title"
+        case eventDeletedAt = "event_deleted_at"
+        case reason
+        case createdAt = "created_at"
+    }
+}
+
 struct BugReportPayload: Codable {
     let description: String
     let appVersion: String?

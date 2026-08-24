@@ -47,6 +47,15 @@ const listBugReports = db.prepare(`
   LIMIT 200
 `);
 
+const listEventReports = db.prepare(`
+  SELECT er.*, e.title AS event_title, e.deleted_at AS event_deleted_at, u.display_name AS reporter_display_name
+  FROM event_reports er
+  JOIN events e ON e.id = er.event_id
+  LEFT JOIN users u ON u.id = er.reporter_id
+  ORDER BY er.created_at DESC
+  LIMIT 200
+`);
+
 // POST /admin/bootstrap — one-time self-promotion to admin, gated by a
 // secret only you know (set via ADMIN_BOOTSTRAP_SECRET). Meant for
 // initial setup/testing before a real admin-management UI exists.
@@ -132,4 +141,11 @@ adminRouter.post("/verification-requests/:id/reject", requireAdmin, (req, res) =
 // GET /admin/bug-reports — everything filed via shake-to-report, newest first.
 adminRouter.get("/bug-reports", requireAdmin, (req, res) => {
   res.json(listBugReports.all());
+});
+
+// GET /admin/event-reports — everything flagged via "Nahlásit akci", newest
+// first. Removing the offending event itself reuses DELETE /events/:id
+// (admins can already delete any event), no separate action needed here.
+adminRouter.get("/event-reports", requireAdmin, (req, res) => {
+  res.json(listEventReports.all());
 });

@@ -10,6 +10,8 @@ struct ProfileView: View {
     @State private var verificationReason = ""
     @State private var errorMessage: String?
     @State private var didCopyToken = false
+    @State private var showingDeleteConfirm = false
+    @State private var showingDeleteAccount = false
     @AppStorage("viewAsMember") private var viewAsMember = false
 
     private var profile: UserProfile? { auth.session?.profile }
@@ -71,6 +73,9 @@ struct ProfileView: View {
                     }
                     NavigationLink("Bug reporty") {
                         AdminBugReportsView()
+                    }
+                    NavigationLink("Nahlášené akce") {
+                        AdminEventReportsView()
                     }
                 }
 
@@ -175,12 +180,30 @@ struct ProfileView: View {
                 }
                 .buttonStyle(.plain)
                 LabeledContent("Verze appky", value: appVersion)
+                Link("Zásady ochrany osobních údajů", destination: URL(string: "https://sc.gabrhelovi.cz/privacy")!)
             } footer: {
                 Text("Klepnutím na token ho zkopíruješ do schránky — hodí se pro ladění přes curl.")
+            }
+
+            Section {
+                Button("Smazat účet", role: .destructive) {
+                    showingDeleteConfirm = true
+                }
+            } footer: {
+                Text("Nenávratně smaže tvůj profil a všechna data k němu vázaná.")
             }
         }
         .refreshable { await load() }
         .onAppear { Task { await load() } }
+        .alert("Opravdu chceš smazat účet?", isPresented: $showingDeleteConfirm) {
+            Button("Zrušit", role: .cancel) {}
+            Button("Pokračovat", role: .destructive) { showingDeleteAccount = true }
+        } message: {
+            Text("Tahle akce nejde vrátit zpět.")
+        }
+        .sheet(isPresented: $showingDeleteAccount) {
+            DeleteAccountView()
+        }
     }
 
     private func load() async {

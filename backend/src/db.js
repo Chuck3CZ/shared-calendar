@@ -85,6 +85,16 @@ db.exec(`
     read_at TEXT
   );
 
+  -- reporter_id is nullable: if the reporter later deletes their account,
+  -- the report stays (an admin still needs to see it) but is anonymized.
+  CREATE TABLE IF NOT EXISTS event_reports (
+    id TEXT PRIMARY KEY,
+    event_id TEXT NOT NULL REFERENCES events(id),
+    reporter_id TEXT REFERENCES users(id),
+    reason TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
   -- user_id is nullable: shake-to-report should work even for a signed-out
   -- visitor hitting a bug before they've ever authenticated.
   CREATE TABLE IF NOT EXISTS bug_reports (

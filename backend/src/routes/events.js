@@ -2,7 +2,7 @@ import { Router } from "express";
 import { randomUUID } from "node:crypto";
 import { db } from "../db.js";
 import { requireUser } from "../identity.js";
-import { notifyUser, notifyOtherUsers } from "../notifications.js";
+import { notifyUser, notifyOtherUsers, notifyAdmins } from "../notifications.js";
 
 export const eventsRouter = Router();
 
@@ -77,6 +77,10 @@ const listReminders = db.prepare(
 );
 const listAcceptedAttendees = db.prepare(
   "SELECT user_id FROM event_responses WHERE event_id = ? AND status = 'accepted' AND user_id != ?"
+);
+
+const insertEventReport = db.prepare(
+  "INSERT INTO event_reports (id, event_id, reporter_id, reason) VALUES (?, ?, ?, ?)"
 );
 
 const listPendingForUser = db.prepare(`
@@ -272,6 +276,32 @@ eventsRouter.patch("/:id", requireUser, (req, res) => {
   }
 
   res.json(getEvent.get(event.id));
+});
+
+// POST /events/:id/report — flag an event for admin review (Guideline
+// 1.2: user-generated content needs a way to report it). Anyone signed in
+// can report, including the owner's own event isn't blocked — moderation
+// is a judgment call for an admin to make, not enforced here.
+eventsRouter.post("/:id/report", requireUser, (req, res) => {
+  const event = getEvent.get(req.params.id);
+  if (!event || event.deleted_at) {
+    return res.status(404).json({ error: "event not found" });
+  }
+  const reason = req.body?.reason;
+  if (!reason || !reason.trim()) {
+    return res.status(400).json({ error: "reason is required" });
+  }
+
+  const id = randomUUID();
+  insertEventReport.run(id, event.id, req.user.id, reason.trim());
+
+  notifyAdmins({
+    title: "Nahlášená akce",
+    body: `${event.title}: ${reason.trim().slice(0, 100)}`,
+    data: { event_id: event.id },
+  }).catch((error) => console.error("event-report push failed:", error));
+
+  res.status(201).json({ id });
 });
 
 // DELETE /events/:id — move an event to the trash (soft delete). Owners can

@@ -69,7 +69,7 @@ universalLinksRouter.get("/event/:id", (req, res) => {
   ${event.location ? `<p class="meta">${escapeHtml(event.location)}</p>` : ""}
   ${event.description ? `<p>${escapeHtml(event.description)}</p>` : ""}
   <p class="meta">Vytvořil: ${escapeHtml(event.owner_name ?? "neznámý")}</p>
-  <div class="hint">Otevři tenhle odkaz na iPhonu s appkou Objevuj, ať uvidíš celý detail a můžeš na akci zareagovat.</div>
+  <div class="hint">Otevři tenhle odkaz na iPhonu s appkou SharedCalendar, ať uvidíš celý detail a můžeš na akci zareagovat.</div>
 </body>
 </html>`);
 });

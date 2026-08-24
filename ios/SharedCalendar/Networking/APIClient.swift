@@ -190,6 +190,22 @@ final class APIClient {
         return try decoder.decode([BugReport].self, from: data)
     }
 
+    func reportEvent(id: String, reason: String) async throws {
+        let body = try encoder.encode(EventReportPayload(reason: reason))
+        _ = try await request("events/\(id)/report", method: "POST", body: body, authenticated: true)
+    }
+
+    func fetchEventReports() async throws -> [EventReport] {
+        let data = try await request("admin/event-reports", authenticated: true)
+        return try decoder.decode([EventReport].self, from: data)
+    }
+
+    /// Permanently deletes the signed-in account and everything tied to it.
+    /// The caller is still responsible for the local sign-out afterward.
+    func deleteAccount() async throws {
+        _ = try await request("me", method: "DELETE", authenticated: true)
+    }
+
     func fetchMe() async throws -> UserProfile {
         let data = try await request("me", authenticated: true)
         return try decoder.decode(UserProfile.self, from: data)

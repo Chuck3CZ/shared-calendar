@@ -21,7 +21,11 @@ targets:
       properties:
         com.apple.developer.applesignin:
           - Default
-        aps-environment: development
+        # Xcode's automatic signing rewrites this to match whatever
+        # provisioning profile actually signs the build (development for a
+        # local/debug run, production for an Archive) — "production" here is
+        # just what should ship, not what every local build gets.
+        aps-environment: production
         com.apple.developer.weatherkit: true
         com.apple.developer.associated-domains:
           - applinks:sc.gabrhelovi.cz
