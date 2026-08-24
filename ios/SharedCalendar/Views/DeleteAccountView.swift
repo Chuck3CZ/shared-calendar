@@ -22,6 +22,10 @@ struct DeleteAccountView: View {
     @State private var currentStep: Step?
     @State private var didFinish = false
     @State private var errorMessage: String?
+    // Read by SignInPromptView once signed out, so the "revoke access in
+    // Settings first" reminder survives past this sheet closing — persisted
+    // (not just in-memory) so it's still there even after the app relaunches.
+    @AppStorage("justDeletedAccount") private var justDeletedAccount = false
 
     var body: some View {
         NavigationStack {
@@ -98,6 +102,7 @@ struct DeleteAccountView: View {
             try await APIClient.shared.deleteAccount()
             currentStep = .signOut
             try? await Task.sleep(for: .seconds(0.4))
+            justDeletedAccount = true
             auth.signOut()
             didFinish = true
             try? await Task.sleep(for: .seconds(0.6))
