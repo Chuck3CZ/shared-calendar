@@ -9,6 +9,9 @@ struct ContentView: View {
             CalendarView()
                 .tabItem { Label("Kalendář", systemImage: "calendar") }
 
+            UpcomingView()
+                .tabItem { Label("Následuje", systemImage: "list.bullet.rectangle.portrait") }
+
             SwipeView()
                 .tabItem { Label("Objevuj", systemImage: "rectangle.stack") }
 

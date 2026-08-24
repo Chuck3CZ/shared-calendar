@@ -30,6 +30,7 @@
 		7A549F3025F08E23B8843957 /* SharedCalendarWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E17A17AD5D23F0AFD564ECE1 /* SharedCalendarWidget.swift */; };
 		7CBC96518DA3B25634C8B465 /* AdminUsersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C943908E5A42879722B0F20 /* AdminUsersView.swift */; };
 		80F841B80753EA4636EDAD5A /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 723295625FC5FB96C877FB13 /* WidgetKit.framework */; };
+		8367D47533B9577B011C9783 /* UpcomingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A59BF7BF2590AD6DD0E13B /* UpcomingView.swift */; };
 		8936708D5BBBAE0E8DAAB0DD /* ReportEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCC4B571AE70624424B8A40 /* ReportEventView.swift */; };
 		8991F35FB830C33D6315B0E8 /* KeychainSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FEEA6E4E83F1460F4581A23 /* KeychainSession.swift */; };
 		96C4F40DBE6FAEF4628D33A2 /* WeatherConditionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = F237393C54FBC5EAA6CD8574 /* WeatherConditionInfo.swift */; };
@@ -45,7 +46,9 @@
 		DC9DF2F1840408F78E126B61 /* PushTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 728844D0DDF6D92C842146AE /* PushTokenStore.swift */; };
 		DDCDF46BF6985B8EA0AA1B80 /* SlideToConfirmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1BF84C3961ED98D377DDE18 /* SlideToConfirmView.swift */; };
 		EF342D719EDFE7085FF73153 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672655541EFC00DF92B943B6 /* AppDelegate.swift */; };
+		F48D7E214076FB54837BA3F8 /* InteractiveMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBB75914558F72880C0E0543 /* InteractiveMapView.swift */; };
 		FB873270DC3F7E821943C228 /* SharedCalendarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9907B5FDD9F5BB072AA56D2A /* SharedCalendarApp.swift */; };
+		FE11D4E296DE4F14161DF840 /* CopyableValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7EF376F1EBB65E771927353 /* CopyableValue.swift */; };
 		FE5AA009EA99810DA085D0AB /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B9A70E0AE36C2EE3ECA676B /* APIClient.swift */; };
 /* End PBXBuildFile section */
 
@@ -105,6 +108,7 @@
 		9FEEA6E4E83F1460F4581A23 /* KeychainSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainSession.swift; sourceTree = "<group>"; };
 		A99B608CAAC941ABFB426701 /* NewEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewEventView.swift; sourceTree = "<group>"; };
 		B203EF495E74B7A751A0E592 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
+		B7EF376F1EBB65E771927353 /* CopyableValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopyableValue.swift; sourceTree = "<group>"; };
 		BBF14366458B05AAB7F3C725 /* SharedCalendar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SharedCalendar.entitlements; sourceTree = "<group>"; };
 		BED9BBB91326184AE74D149D /* AdminBugReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminBugReportsView.swift; sourceTree = "<group>"; };
 		BF0FADD63C4F32A55F485636 /* LocationPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPickerView.swift; sourceTree = "<group>"; };
@@ -116,8 +120,10 @@
 		E9FFE5A513BCD2E5F5B8FB83 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		EDA24C6C582D3AB311CEB227 /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		EFE867FA587A86205FC7CA59 /* VerifiedBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifiedBadge.swift; sourceTree = "<group>"; };
+		F1A59BF7BF2590AD6DD0E13B /* UpcomingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpcomingView.swift; sourceTree = "<group>"; };
 		F237393C54FBC5EAA6CD8574 /* WeatherConditionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherConditionInfo.swift; sourceTree = "<group>"; };
 		F9260C584F63129AF18F79EA /* SignInPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInPromptView.swift; sourceTree = "<group>"; };
+		FBB75914558F72880C0E0543 /* InteractiveMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractiveMapView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -167,7 +173,9 @@
 				5C943908E5A42879722B0F20 /* AdminUsersView.swift */,
 				C3B6BD2FEC9A64C749638158 /* BugReportView.swift */,
 				C37E27D983281FBBF91DAA4B /* CalendarView.swift */,
+				B7EF376F1EBB65E771927353 /* CopyableValue.swift */,
 				3C674073D4FE16CB1915F672 /* DeleteAccountView.swift */,
+				FBB75914558F72880C0E0543 /* InteractiveMapView.swift */,
 				BF0FADD63C4F32A55F485636 /* LocationPickerView.swift */,
 				A99B608CAAC941ABFB426701 /* NewEventView.swift */,
 				478A5291629EE57C22BBCC33 /* NotificationHistoryView.swift */,
@@ -177,6 +185,7 @@
 				E1BF84C3961ED98D377DDE18 /* SlideToConfirmView.swift */,
 				28DD10DFDD09AF172D196B4C /* StaticMapPreview.swift */,
 				1FC0097D4083EA6FECA627E7 /* SwipeView.swift */,
+				F1A59BF7BF2590AD6DD0E13B /* UpcomingView.swift */,
 				EFE867FA587A86205FC7CA59 /* VerifiedBadge.swift */,
 				F237393C54FBC5EAA6CD8574 /* WeatherConditionInfo.swift */,
 				338412FE91967FCA56CDA4B2 /* WeatherSummaryView.swift */,
@@ -414,9 +423,11 @@
 				6A06DD23241105CAB60532FB /* BugReportView.swift in Sources */,
 				56E3E97CD2CCD80E009859C0 /* CalendarView.swift in Sources */,
 				330F328FB34F0B9B868E8218 /* ContentView.swift in Sources */,
+				FE11D4E296DE4F14161DF840 /* CopyableValue.swift in Sources */,
 				3C93DEE52589F720B4B165A9 /* DeepLinkRouter.swift in Sources */,
 				A2C7490A2949CEA90C6160EE /* DeleteAccountView.swift in Sources */,
 				A810425834DA17BAB893E65F /* Event.swift in Sources */,
+				F48D7E214076FB54837BA3F8 /* InteractiveMapView.swift in Sources */,
 				8991F35FB830C33D6315B0E8 /* KeychainSession.swift in Sources */,
 				2B721A0DB90FB11444E14E49 /* LocationPickerView.swift in Sources */,
 				44A7CE0D23C68727A64033E6 /* NewEventView.swift in Sources */,
@@ -432,6 +443,7 @@
 				DDCDF46BF6985B8EA0AA1B80 /* SlideToConfirmView.swift in Sources */,
 				16674B1ACCF5A8AF7578E8B5 /* StaticMapPreview.swift in Sources */,
 				0BA6A6EECEE8BDD27D2F9AB4 /* SwipeView.swift in Sources */,
+				8367D47533B9577B011C9783 /* UpcomingView.swift in Sources */,
 				B932A8D4655905505F2278C3 /* VerifiedBadge.swift in Sources */,
 				96C4F40DBE6FAEF4628D33A2 /* WeatherConditionInfo.swift in Sources */,
 				48E708AD672029E599F0CFEA /* WeatherSummaryView.swift in Sources */,

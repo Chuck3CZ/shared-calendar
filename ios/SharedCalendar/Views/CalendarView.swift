@@ -45,6 +45,13 @@ struct CalendarView: View {
                     .datePickerStyle(.graphical)
                     .padding(.horizontal)
                     .id(datePickerRefreshID)
+                    // UICalendarView sizes its own cells to however many
+                    // weeks the visible month needs (4 vs 6), so text and
+                    // grid spacing visibly jump when switching months. A
+                    // fixed height doesn't stop that internal resizing, but
+                    // it does stop the rest of the page from jumping along
+                    // with it.
+                    .frame(height: 360)
 
                 List {
                     if let errorMessage {
@@ -175,6 +182,7 @@ struct EventDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showingDeleteConfirm = false
     @State private var showingSlideToDelete = false
+    @State private var showingInteractiveMap = false
     @State private var didDelete = false
     @State private var isDeleting = false
     @State private var errorMessage: String?
@@ -229,12 +237,12 @@ struct EventDetailView: View {
         NavigationStack {
             Form {
                 Section("Akce") {
-                    LabeledContent("Název", value: event.title)
+                    LabeledContent("Název") { CopyableValue(text: event.title) }
                     if let description = event.description, !description.isEmpty {
                         LabeledContent("Popis", value: description)
                     }
                     if let location = event.location, !location.isEmpty {
-                        LabeledContent("Místo", value: location)
+                        LabeledContent("Místo") { CopyableValue(text: location) }
                     }
                     LabeledContent("Kdy", value: event.startAt.formatted(date: .abbreviated, time: .shortened))
                     if let endAt = event.endAt {
@@ -245,13 +253,18 @@ struct EventDetailView: View {
                             .verifiedBadge(role: event.ownerRole)
                     }
                     if let acceptedCount = event.acceptedCount, acceptedCount > 0 {
-                        LabeledContent("Jde") {
+                        LabeledContent("Zúčastní se") {
                             Label("\(acceptedCount)", systemImage: "person.2.fill")
                         }
                     }
                     if let latitude = event.latitude, let longitude = event.longitude {
-                        StaticMapPreview(latitude: latitude, longitude: longitude, title: event.location ?? event.title, spanDelta: 0.002, height: 150)
-                            .listRowInsets(EdgeInsets())
+                        Button {
+                            showingInteractiveMap = true
+                        } label: {
+                            StaticMapPreview(latitude: latitude, longitude: longitude, title: event.location ?? event.title, spanDelta: 0.002, height: 150)
+                        }
+                        .buttonStyle(.plain)
+                        .listRowInsets(EdgeInsets())
                         WeatherSummaryView(
                             condition: event.weatherCondition,
                             temperature: event.weatherTemperature,
@@ -341,6 +354,11 @@ struct EventDetailView: View {
             .sensoryFeedback(.warning, trigger: didDelete)
             .sheet(isPresented: $showingReportEvent) {
                 ReportEventView(eventId: event.id)
+            }
+            .sheet(isPresented: $showingInteractiveMap) {
+                if let latitude = event.latitude, let longitude = event.longitude {
+                    InteractiveMapView(latitude: latitude, longitude: longitude, title: event.location ?? event.title)
+                }
             }
         }
     }
