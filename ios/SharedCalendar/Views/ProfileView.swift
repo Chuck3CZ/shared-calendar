@@ -6,7 +6,6 @@ struct ProfileView: View {
     @State private var created: [Event] = []
     @State private var responses: [RespondedEvent] = []
     @State private var verificationStatus: VerificationRequest?
-    @State private var pendingRequests: [VerificationRequest] = []
     @State private var verificationReason = ""
     @State private var errorMessage: String?
     @State private var didCopyToken = false
@@ -77,31 +76,8 @@ struct ProfileView: View {
                     NavigationLink("Nahlášené akce") {
                         AdminEventReportsView()
                     }
-                }
-
-                Section("Žádosti o ověření (\(pendingRequests.count))") {
-                    if pendingRequests.isEmpty {
-                        Text("Žádné čekající žádosti").foregroundStyle(.secondary)
-                    } else {
-                        ForEach(pendingRequests) { request in
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text(request.userDisplayName ?? "Bez jména").font(.headline)
-                                if let reason = request.reason, !reason.isEmpty {
-                                    Text(reason).font(.caption).foregroundStyle(.secondary)
-                                }
-                                HStack {
-                                    Button("Zamítnout", role: .destructive) {
-                                        Task { await reject(request) }
-                                    }
-                                    Spacer()
-                                    Button("Schválit") {
-                                        Task { await approve(request) }
-                                    }
-                                }
-                            }
-                            .padding(.vertical, 4)
-                        }
-                    }
+                } footer: {
+                    Text("Žádosti o ověření nových účtů se schvalují ve Správě uživatelů.")
                 }
             }
 
@@ -216,9 +192,6 @@ struct ProfileView: View {
             if profile?.role == "basic" {
                 verificationStatus = try? await APIClient.shared.fetchVerificationStatus()
             }
-            if profile?.role == "admin" {
-                pendingRequests = (try? await APIClient.shared.fetchPendingVerificationRequests()) ?? []
-            }
             errorMessage = nil
         } catch {
             guard !error.isCancellation else { return }
@@ -237,25 +210,6 @@ struct ProfileView: View {
         }
     }
 
-    private func approve(_ request: VerificationRequest) async {
-        do {
-            try await APIClient.shared.approveVerificationRequest(id: request.id)
-            pendingRequests.removeAll { $0.id == request.id }
-        } catch {
-            guard !error.isCancellation else { return }
-            errorMessage = "Nepodařilo se schválit žádost: \(error.localizedDescription)"
-        }
-    }
-
-    private func reject(_ request: VerificationRequest) async {
-        do {
-            try await APIClient.shared.rejectVerificationRequest(id: request.id)
-            pendingRequests.removeAll { $0.id == request.id }
-        } catch {
-            guard !error.isCancellation else { return }
-            errorMessage = "Nepodařilo se zamítnout žádost: \(error.localizedDescription)"
-        }
-    }
 }
 
 #Preview {

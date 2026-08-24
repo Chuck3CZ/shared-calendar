@@ -214,9 +214,12 @@ eventsRouter.post("/:id/response", requireUser, (req, res) => {
 
   upsertResponse.run(req.user.id, event.id, status);
 
-  if (status === "rejected") {
-    deleteReminders.run(req.user.id, event.id);
-  } else if (countReminders.get(req.user.id, event.id).count === 0) {
+  // Rejecting no longer wipes reminder_settings — the reminder scheduler
+  // already only fires for status = 'accepted', so a leftover row for a
+  // rejected event is inert. Deleting it here used to mean an accidental
+  // reject-then-re-accept lost whatever custom offsets you'd picked,
+  // silently replaced by the default on re-accept.
+  if (status === "accepted" && countReminders.get(req.user.id, event.id).count === 0) {
     insertReminder.run(randomUUID(), req.user.id, event.id, DEFAULT_REMINDER_MINUTES);
   }
 
