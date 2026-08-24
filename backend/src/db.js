@@ -149,3 +149,22 @@ try {
 } catch {
   // column already exists
 }
+
+// Weather is fetched server-side (once daily, plus once right after an
+// event is created/edited) and cached here — the app used to call
+// WeatherKit directly from every device on every load, one WeatherKit
+// call per viewer per view instead of one per event per day.
+for (const column of [
+  "weather_condition TEXT",
+  "weather_temperature REAL",
+  "weather_temperature_min REAL",
+  "weather_temperature_max REAL",
+  "weather_is_hourly INTEGER",
+  "weather_updated_at TEXT",
+]) {
+  try {
+    db.exec(`ALTER TABLE events ADD COLUMN ${column}`);
+  } catch {
+    // column already exists
+  }
+}

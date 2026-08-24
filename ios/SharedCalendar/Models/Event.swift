@@ -17,6 +17,17 @@ struct Event: Codable, Identifiable, Equatable {
     let longitude: Double?
     /// How many people (besides a pending count of nobody) have swiped "accepted".
     let acceptedCount: Int?
+    /// Fetched server-side (once daily, plus right after create/edit) —
+    /// the app never calls WeatherKit itself. Raw condition code, e.g.
+    /// "MostlyClear"; see WeatherConditionInfo for the SF Symbol/Czech text.
+    let weatherCondition: String?
+    let weatherTemperature: Double?
+    let weatherTemperatureMin: Double?
+    let weatherTemperatureMax: Double?
+    /// 1 = a specific hour's forecast (weatherTemperature), 0 = that
+    /// calendar day's high/low (weatherTemperatureMin/Max), nil = no
+    /// forecast cached yet (e.g. the event is too far out).
+    let weatherIsHourly: Int?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -33,6 +44,11 @@ struct Event: Codable, Identifiable, Equatable {
         case latitude
         case longitude
         case acceptedCount = "accepted_count"
+        case weatherCondition = "weather_condition"
+        case weatherTemperature = "weather_temperature"
+        case weatherTemperatureMin = "weather_temperature_min"
+        case weatherTemperatureMax = "weather_temperature_max"
+        case weatherIsHourly = "weather_is_hourly"
     }
 }
 

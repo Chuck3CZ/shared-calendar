@@ -252,7 +252,13 @@ struct EventDetailView: View {
                     if let latitude = event.latitude, let longitude = event.longitude {
                         StaticMapPreview(latitude: latitude, longitude: longitude, title: event.location ?? event.title, spanDelta: 0.002, height: 150)
                             .listRowInsets(EdgeInsets())
-                        WeatherSummaryView(latitude: latitude, longitude: longitude, date: event.startAt)
+                        WeatherSummaryView(
+                            condition: event.weatherCondition,
+                            temperature: event.weatherTemperature,
+                            temperatureMin: event.weatherTemperatureMin,
+                            temperatureMax: event.weatherTemperatureMax,
+                            isHourly: event.weatherIsHourly == 1
+                        )
                         Button("Otevřít v Mapách") {
                             openInMaps(latitude: latitude, longitude: longitude, name: event.location ?? event.title)
                         }

@@ -13,9 +13,12 @@ services:
       - APNS_KEY_PATH=/secrets/apns_key.p8
       - GITHUB_TOKEN=${GITHUB_TOKEN}
       - GITHUB_REPO=${GITHUB_REPO}
+      - WEATHERKIT_KEY_ID=${WEATHERKIT_KEY_ID}
+      - WEATHERKIT_KEY_PATH=/secrets/weatherkit_key.p8
     volumes:
       - ./data:/data
       - ./apns_key.p8:/secrets/apns_key.p8:ro
+      - ./weatherkit_key.p8:/secrets/weatherkit_key.p8:ro
 
   cloudflared:
     image: cloudflare/cloudflared:latest

@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { db } from "../db.js";
 import { requireUser } from "../identity.js";
 import { notifyUser, notifyOtherUsers, notifyAdmins } from "../notifications.js";
+import { refreshWeatherForEvent } from "../weather.js";
 
 export const eventsRouter = Router();
 
@@ -178,6 +179,10 @@ eventsRouter.post("/", requireUser, (req, res) => {
     data: { event_id: id },
   }).catch((error) => console.error("new-event push failed:", error));
 
+  refreshWeatherForEvent(id, latitude, longitude, start_at).catch((error) =>
+    console.error("weather refresh failed:", error)
+  );
+
   res.status(201).json(getEvent.get(id));
 });
 
@@ -300,6 +305,12 @@ eventsRouter.patch("/:id", requireUser, (req, res) => {
       data: { event_id: event.id },
     }).catch((error) => console.error("edit-event push failed:", error));
   }
+
+  // Location and/or time may have changed — refetch rather than trust
+  // whatever was cached for the old ones.
+  refreshWeatherForEvent(event.id, latitude, longitude, start_at).catch((error) =>
+    console.error("weather refresh failed:", error)
+  );
 
   res.json(getEvent.get(event.id));
 });
