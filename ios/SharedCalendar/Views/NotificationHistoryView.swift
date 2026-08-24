@@ -11,12 +11,6 @@ struct NotificationHistoryView: View {
     @State private var didDelete = false
     @Environment(\.dismiss) private var dismiss
 
-    private static let displayFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        formatter.timeZone = TimeZone(identifier: "UTC")
-        return formatter
-    }()
 
     var body: some View {
         NavigationStack {
@@ -41,7 +35,7 @@ struct NotificationHistoryView: View {
                                     Text(item.title).font(.headline)
                                     Text(item.body).font(.subheadline).foregroundStyle(.secondary)
                                     HStack(spacing: 6) {
-                                        Text(relativeDate(item.createdAt))
+                                        Text(ServerDate.relative(item.createdAt))
                                         if eventGone {
                                             Text("· akce smazána")
                                         }
@@ -86,11 +80,6 @@ struct NotificationHistoryView: View {
             .task { await load() }
             .sensoryFeedback(.impact(weight: .light), trigger: didDelete)
         }
-    }
-
-    private func relativeDate(_ raw: String) -> String {
-        guard let date = Self.displayFormatter.date(from: raw) else { return raw }
-        return date.formatted(.relative(presentation: .named))
     }
 
     private func load() async {

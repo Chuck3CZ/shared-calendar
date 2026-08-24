@@ -9,6 +9,28 @@ let cachedProviderToken = null;
 let cachedProviderTokenIssuedAt = 0;
 const PROVIDER_TOKEN_TTL_MS = 50 * 60 * 1000; // Apple tokens are valid up to 1h; refresh at 50m
 
+// One shared HTTP/2 session reused across pushes instead of a fresh
+// connection (TLS handshake + all) per notification — matters once this is
+// sending more than a handful of pushes at a time.
+let cachedClient = null;
+let cachedClientHost = null;
+
+function getClient(host) {
+  if (cachedClient && cachedClientHost === host && !cachedClient.closed && !cachedClient.destroyed) {
+    return cachedClient;
+  }
+  const client = http2.connect(host);
+  client.on("error", () => {
+    if (cachedClient === client) cachedClient = null;
+  });
+  client.on("close", () => {
+    if (cachedClient === client) cachedClient = null;
+  });
+  cachedClient = client;
+  cachedClientHost = host;
+  return client;
+}
+
 function isConfigured() {
   return Boolean(
     process.env.APNS_KEY_PATH &&
@@ -51,10 +73,7 @@ export function sendPush(deviceToken, { title, body, data, badge }) {
       ...(data ?? {}),
     });
 
-    const client = http2.connect(host);
-    client.on("error", (error) => {
-      resolve({ ok: false, status: 0, shouldRemoveToken: false, error: error.message });
-    });
+    const client = getClient(host);
 
     const req = client.request({
       ":method": "POST",
@@ -76,7 +95,6 @@ export function sendPush(deviceToken, { title, body, data, badge }) {
     });
 
     req.on("end", () => {
-      client.close();
       const ok = status === 200;
       const reason = (() => {
         try {
@@ -91,8 +109,10 @@ export function sendPush(deviceToken, { title, body, data, badge }) {
       resolve({ ok, status, shouldRemoveToken, error: ok ? null : reason ?? responseBody });
     });
 
+    // A stream-level error doesn't necessarily mean the shared session is
+    // dead — getClient()'s own error/close handlers already handle
+    // discarding and reconnecting it when that's actually the case.
     req.on("error", (error) => {
-      client.close();
       resolve({ ok: false, status, shouldRemoveToken: false, error: error.message });
     });
 

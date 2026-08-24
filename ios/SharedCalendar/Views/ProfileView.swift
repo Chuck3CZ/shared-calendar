@@ -171,7 +171,7 @@ struct ProfileView: View {
                     }
                 } label: {
                     LabeledContent("Session token") {
-                        Text(didCopyToken ? "Zkopírováno" : (auth.session?.token ?? ""))
+                        Text(didCopyToken ? "Zkopírováno" : "•••••••• (klepnutím zkopíruješ)")
                             .font(.caption2)
                             .foregroundStyle(didCopyToken ? .green : .secondary)
                             .lineLimit(1)

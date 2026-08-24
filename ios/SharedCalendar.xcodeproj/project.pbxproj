@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		00941AF1B8B69BACB0287E05 /* SignInNonce.swift in Sources */ = {isa = PBXBuildFile; fileRef = 865FEF11E6E8D6433369CF60 /* SignInNonce.swift */; };
 		05642034B9444B65D43CEF2A /* SignInPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9260C584F63129AF18F79EA /* SignInPromptView.swift */; };
 		0BA6A6EECEE8BDD27D2F9AB4 /* SwipeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FC0097D4083EA6FECA627E7 /* SwipeView.swift */; };
 		143D89CA6BD218D4BDAA34F5 /* AdminBugReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BED9BBB91326184AE74D149D /* AdminBugReportsView.swift */; };
@@ -15,6 +16,7 @@
 		330F328FB34F0B9B868E8218 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5D6AD1C0FAF961018BA7C5 /* ContentView.swift */; };
 		3752629E2BF10E3ACA078EB6 /* WidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 386D79CCC56E9EF9668E555A /* WidgetDataStore.swift */; };
 		3931C6036739D511D2DED66E /* WidgetDataStore+Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 655C89AB68AE1A58B4072E4D /* WidgetDataStore+Events.swift */; };
+		3A9452C4B610C8D6BE6AB67B /* ServerDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2873AC5C152E5C24E34F465D /* ServerDate.swift */; };
 		3C93DEE52589F720B4B165A9 /* DeepLinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2E5BF975131F6C2313DFAFA /* DeepLinkRouter.swift */; };
 		431FDCCA70EFDC88DB1E6F4E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 90D0A053CCC02AEE4770E2CC /* PrivacyInfo.xcprivacy */; };
 		443193D8C272A88E2AE8DA71 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 47218B41F638F407C8BF1A9A /* SwiftUI.framework */; };
@@ -73,6 +75,7 @@
 /* Begin PBXFileReference section */
 		1FC0097D4083EA6FECA627E7 /* SwipeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeView.swift; sourceTree = "<group>"; };
 		2540FDFEC2B78D08113E1EF7 /* ShakeDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShakeDetector.swift; sourceTree = "<group>"; };
+		2873AC5C152E5C24E34F465D /* ServerDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerDate.swift; sourceTree = "<group>"; };
 		28DD10DFDD09AF172D196B4C /* StaticMapPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaticMapPreview.swift; sourceTree = "<group>"; };
 		2A3CC29F4020D076D58FE4B4 /* SharedCalendar.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SharedCalendar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2FCC4B571AE70624424B8A40 /* ReportEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportEventView.swift; sourceTree = "<group>"; };
@@ -92,6 +95,7 @@
 		723295625FC5FB96C877FB13 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		728844D0DDF6D92C842146AE /* PushTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushTokenStore.swift; sourceTree = "<group>"; };
 		756AFB570AF9DE2AD695E6BC /* AdminEventReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminEventReportsView.swift; sourceTree = "<group>"; };
+		865FEF11E6E8D6433369CF60 /* SignInNonce.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInNonce.swift; sourceTree = "<group>"; };
 		90D0A053CCC02AEE4770E2CC /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		92783EC1CEE72B6A13D18EBE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		97685D8A58BD608CB9604DBD /* SharedCalendarWidgetExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = SharedCalendarWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -214,7 +218,9 @@
 				C2E5BF975131F6C2313DFAFA /* DeepLinkRouter.swift */,
 				9FEEA6E4E83F1460F4581A23 /* KeychainSession.swift */,
 				728844D0DDF6D92C842146AE /* PushTokenStore.swift */,
+				2873AC5C152E5C24E34F465D /* ServerDate.swift */,
 				2540FDFEC2B78D08113E1EF7 /* ShakeDetector.swift */,
+				865FEF11E6E8D6433369CF60 /* SignInNonce.swift */,
 				386D79CCC56E9EF9668E555A /* WidgetDataStore.swift */,
 				655C89AB68AE1A58B4072E4D /* WidgetDataStore+Events.swift */,
 			);
@@ -415,8 +421,10 @@
 				5CAA8D645AE67F7BE1DAEE7F /* ProfileView.swift in Sources */,
 				DC9DF2F1840408F78E126B61 /* PushTokenStore.swift in Sources */,
 				8936708D5BBBAE0E8DAAB0DD /* ReportEventView.swift in Sources */,
+				3A9452C4B610C8D6BE6AB67B /* ServerDate.swift in Sources */,
 				A665AC250102620252CEB632 /* ShakeDetector.swift in Sources */,
 				FB873270DC3F7E821943C228 /* SharedCalendarApp.swift in Sources */,
+				00941AF1B8B69BACB0287E05 /* SignInNonce.swift in Sources */,
 				05642034B9444B65D43CEF2A /* SignInPromptView.swift in Sources */,
 				DDCDF46BF6985B8EA0AA1B80 /* SlideToConfirmView.swift in Sources */,
 				16674B1ACCF5A8AF7578E8B5 /* StaticMapPreview.swift in Sources */,

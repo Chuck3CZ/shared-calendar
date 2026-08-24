@@ -19,8 +19,8 @@ final class AuthManager: ObservableObject {
         }
     }
 
-    func signIn(identityToken: String, fullName: String?) async throws {
-        let response = try await APIClient.shared.authenticateWithApple(identityToken: identityToken, fullName: fullName)
+    func signIn(identityToken: String, fullName: String?, nonce: String) async throws {
+        let response = try await APIClient.shared.authenticateWithApple(identityToken: identityToken, fullName: fullName, nonce: nonce)
         let info = SessionInfo(token: response.token, profile: response.user)
         KeychainSession.save(info)
         session = info

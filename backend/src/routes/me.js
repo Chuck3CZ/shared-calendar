@@ -16,6 +16,15 @@ const upsertDeviceToken = db.prepare(`
   INSERT INTO device_tokens (user_id, apns_token) VALUES (?, ?)
   ON CONFLICT (user_id, apns_token) DO NOTHING
 `);
+// A physical device can only usefully be "owned" by one signed-in account
+// at a time — without this, switching accounts on a shared/reused device
+// (or an admin's "view as member" test account, if that ever registers a
+// real token) would leave the previous account still getting pushed to.
+// Sign-out itself deliberately does NOT clear this — signing out isn't
+// account deletion, and the same account may still want to be notified.
+const deleteStaleDeviceToken = db.prepare(
+  "DELETE FROM device_tokens WHERE apns_token = ? AND user_id != ?"
+);
 const deleteDeviceToken = db.prepare(
   "DELETE FROM device_tokens WHERE user_id = ? AND apns_token = ?"
 );
@@ -108,6 +117,7 @@ meRouter.post("/device-token", requireUser, (req, res) => {
   if (!token) {
     return res.status(400).json({ error: "token is required" });
   }
+  deleteStaleDeviceToken.run(token, req.user.id);
   upsertDeviceToken.run(req.user.id, token);
   res.status(204).end();
 });

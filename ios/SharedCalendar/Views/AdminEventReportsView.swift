@@ -9,13 +9,6 @@ struct AdminEventReportsView: View {
     @State private var errorMessage: String?
     @State private var deletingEventId: String?
 
-    private static let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        formatter.timeZone = TimeZone(identifier: "UTC")
-        return formatter
-    }()
-
     var body: some View {
         List {
             if let errorMessage {
@@ -41,7 +34,7 @@ struct AdminEventReportsView: View {
                         HStack(spacing: 8) {
                             Text(report.reporterDisplayName ?? "Neznámý")
                             Text("·")
-                            Text(relativeDate(report.createdAt))
+                            Text(ServerDate.relative(report.createdAt))
                         }
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -61,11 +54,6 @@ struct AdminEventReportsView: View {
         .navigationTitle("Nahlášené akce")
         .refreshable { await load() }
         .task { await load() }
-    }
-
-    private func relativeDate(_ raw: String) -> String {
-        guard let date = Self.dateFormatter.date(from: raw) else { return raw }
-        return date.formatted(.relative(presentation: .named))
     }
 
     private func load() async {

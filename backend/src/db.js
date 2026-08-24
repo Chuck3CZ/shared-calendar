@@ -56,7 +56,8 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS sessions (
     token TEXT PRIMARY KEY,
     user_id TEXT NOT NULL REFERENCES users(id),
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    expires_at TEXT
   );
 
   -- Replaces event_responses.notified_at: lets each attendee pick their own
@@ -136,6 +137,15 @@ try {
 
 try {
   db.exec("ALTER TABLE bug_reports ADD COLUMN github_issue_url TEXT");
+} catch {
+  // column already exists
+}
+
+// Nullable on purpose: existing sessions from before this column existed
+// keep working (NULL = never expires) rather than force-logging everyone
+// out the moment this deploys. Every new session gets a real expiry.
+try {
+  db.exec("ALTER TABLE sessions ADD COLUMN expires_at TEXT");
 } catch {
   // column already exists
 }

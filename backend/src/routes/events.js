@@ -127,6 +127,21 @@ function locationIsMissingOrImprecise(location, latitude, longitude) {
   return !location || latitude == null || longitude == null;
 }
 
+// A malformed start_at would otherwise pass silently through as NaN and
+// permanently wedge that reminder — checkAndSendReminders() compares
+// against a NaN timestamp, which is never <= anything, so it's never
+// marked notified and gets re-evaluated every minute forever.
+function isValidISODate(value) {
+  return typeof value === "string" && !Number.isNaN(new Date(value).getTime());
+}
+
+function eventTimesError(start_at, end_at) {
+  if (!isValidISODate(start_at)) return "start_at must be a valid date";
+  if (end_at != null && !isValidISODate(end_at)) return "end_at must be a valid date";
+  if (end_at != null && new Date(end_at) <= new Date(start_at)) return "end_at must be after start_at";
+  return null;
+}
+
 // POST /events — create an event (requires identity)
 eventsRouter.post("/", requireUser, (req, res) => {
   const { title, description, location, start_at, end_at, latitude, longitude } = req.body;
@@ -135,6 +150,10 @@ eventsRouter.post("/", requireUser, (req, res) => {
   }
   if (locationIsMissingOrImprecise(location, latitude, longitude)) {
     return res.status(400).json({ error: "location is required and must be picked from the map" });
+  }
+  const timesError = eventTimesError(start_at, end_at);
+  if (timesError) {
+    return res.status(400).json({ error: timesError });
   }
 
   if (req.user.role === "basic") {
@@ -258,6 +277,10 @@ eventsRouter.patch("/:id", requireUser, (req, res) => {
   }
   if (locationIsMissingOrImprecise(location, latitude, longitude)) {
     return res.status(400).json({ error: "location is required and must be picked from the map" });
+  }
+  const timesError = eventTimesError(start_at, end_at);
+  if (timesError) {
+    return res.status(400).json({ error: timesError });
   }
 
   // Matched by the event's actual owner, not the requester — otherwise an

@@ -121,7 +121,16 @@ struct SwipeView: View {
         // ever persisted, so it's fully forgotten once the toggle is off.
         guard !viewAsMember else { return }
         Task {
-            try? await APIClient.shared.respond(eventId: event.id, status: status)
+            do {
+                try await APIClient.shared.respond(eventId: event.id, status: status)
+            } catch {
+                guard !error.isCancellation else { return }
+                // Card was already removed optimistically — put it back
+                // rather than silently losing the swipe on a network error.
+                pending.insert(event, at: 0)
+                updateBadge()
+                errorMessage = "Odpověď se neuložila, zkus to znovu: \(error.localizedDescription)"
+            }
         }
     }
 

@@ -39,6 +39,9 @@ privacyRouter.get("/privacy", (req, res) => {
     <li>Obsah bug reportů a nahlášení akcí, které sám odešleš, včetně verze appky a modelu zařízení.</li>
   </ul>
 
+  <h2>Veřejná viditelnost akcí</h2>
+  <p>Kalendář je záměrně otevřený: název, popis, místo a přesné souřadnice každé akce, spolu se jménem toho, kdo ji vytvořil, jsou viditelné komukoli, kdo appku otevře nebo navštíví odkaz na konkrétní akci na webu — přihlášení ani účet k tomu není potřeba. Přihlášení je potřeba až pro vytváření akcí a reakci na ně (jdu / nejdu). Pokud svůj účet smažeš, akce, které jsi vytvořil, se s ním smažou a přestanou být kdekoli vidět.</p>
+
   <h2>K čemu se data používají</h2>
   <p>Výhradně k provozu appky: zobrazení sdíleného kalendáře, doručení push upozornění, a — u nových účtů bez ověření — k omezení počtu vytvořených akcí kvůli ochraně před zneužitím.</p>
 

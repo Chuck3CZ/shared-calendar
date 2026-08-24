@@ -7,13 +7,6 @@ struct AdminBugReportsView: View {
     @State private var isLoading = true
     @State private var errorMessage: String?
 
-    private static let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        formatter.timeZone = TimeZone(identifier: "UTC")
-        return formatter
-    }()
-
     var body: some View {
         List {
             if let errorMessage {
@@ -31,7 +24,7 @@ struct AdminBugReportsView: View {
                         HStack(spacing: 8) {
                             Text(report.userDisplayName ?? "Nepřihlášený")
                             Text("·")
-                            Text(relativeDate(report.createdAt))
+                            Text(ServerDate.relative(report.createdAt))
                             if let appVersion = report.appVersion {
                                 Text("· build \(appVersion)")
                             }
@@ -57,11 +50,6 @@ struct AdminBugReportsView: View {
         .navigationTitle("Bug reporty")
         .refreshable { await load() }
         .task { await load() }
-    }
-
-    private func relativeDate(_ raw: String) -> String {
-        guard let date = Self.dateFormatter.date(from: raw) else { return raw }
-        return date.formatted(.relative(presentation: .named))
     }
 
     private func load() async {

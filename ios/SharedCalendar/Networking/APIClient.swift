@@ -4,6 +4,7 @@ enum APIError: Error {
     case server(String)
     case invalidResponse
     case notAuthenticated
+    case invalidRequest
 }
 
 extension APIError: LocalizedError {
@@ -12,6 +13,7 @@ extension APIError: LocalizedError {
         case .server(let message): return message
         case .invalidResponse: return "Neplatná odpověď serveru."
         case .notAuthenticated: return "Nejsi přihlášený."
+        case .invalidRequest: return "Neplatný požadavek."
         }
     }
 }
@@ -45,18 +47,37 @@ final class APIClient {
 
     private let decoder: JSONDecoder = {
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        // Plain .iso8601 has no fractional-seconds support at all — one date
+        // string like "...12:00:00.500Z" would fail to decode and take the
+        // whole response down with it. Try with fractional seconds first,
+        // fall back to without.
+        let withFractional = ISO8601DateFormatter()
+        withFractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let standard = ISO8601DateFormatter()
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let string = try container.decode(String.self)
+            if let date = withFractional.date(from: string) ?? standard.date(from: string) {
+                return date
+            }
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid ISO8601 date: \(string)")
+        }
         return decoder
     }()
 
     private let encoder = JSONEncoder()
 
     private func request(_ path: String, queryItems: [URLQueryItem] = [], method: String = "GET", body: Data? = nil, authenticated: Bool = false, optionalAuth: Bool = false, bearerOverride: String? = nil, extraHeaders: [String: String] = [:]) async throws -> Data {
-        var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: true)!
+        guard var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: true) else {
+            throw APIError.invalidRequest
+        }
         if !queryItems.isEmpty {
             components.queryItems = queryItems
         }
-        var request = URLRequest(url: components.url!)
+        guard let url = components.url else {
+            throw APIError.invalidRequest
+        }
+        var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         if let bearerOverride {
@@ -95,12 +116,13 @@ final class APIClient {
         _ = try await request("auth/session", method: "DELETE", bearerOverride: token)
     }
 
-    func authenticateWithApple(identityToken: String, fullName: String?) async throws -> AuthResponse {
+    func authenticateWithApple(identityToken: String, fullName: String?, nonce: String) async throws -> AuthResponse {
         struct Payload: Codable {
             let identityToken: String
             let fullName: String?
+            let nonce: String
         }
-        let body = try encoder.encode(Payload(identityToken: identityToken, fullName: fullName))
+        let body = try encoder.encode(Payload(identityToken: identityToken, fullName: fullName, nonce: nonce))
         let data = try await request("auth/apple", method: "POST", body: body)
         return try decoder.decode(AuthResponse.self, from: data)
     }

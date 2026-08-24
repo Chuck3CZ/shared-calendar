@@ -26,6 +26,11 @@ struct CalendarView: View {
     // background, only fixing itself once that cell is interacted with.
     // Forcing SwiftUI to recreate it on foreground works around that.
     @State private var datePickerRefreshID = UUID()
+    // The window actually fetched — selectedDate can wander anywhere via
+    // the graphical DatePicker, well outside it, so it needs tracking to
+    // know when a refetch centered on the new date is actually due.
+    @State private var loadedFrom: Date?
+    @State private var loadedTo: Date?
 
     private var eventsForSelectedDay: [Event] {
         events
@@ -135,17 +140,23 @@ struct CalendarView: View {
                 guard newPhase == .active else { return }
                 datePickerRefreshID = UUID()
             }
+            .onChange(of: selectedDate) { _, newDate in
+                guard let loadedFrom, let loadedTo, !(loadedFrom...loadedTo).contains(newDate) else { return }
+                Task { await load(around: newDate) }
+            }
         }
     }
 
-    private func load() async {
+    private func load(around referenceDate: Date = Date()) async {
         isLoading = true
         defer { isLoading = false }
         do {
             let calendar = Calendar.current
-            let from = calendar.date(byAdding: .month, value: -1, to: Date()) ?? Date()
-            let to = calendar.date(byAdding: .month, value: 3, to: Date()) ?? Date()
+            let from = calendar.date(byAdding: .month, value: -1, to: referenceDate) ?? referenceDate
+            let to = calendar.date(byAdding: .month, value: 3, to: referenceDate) ?? referenceDate
             events = try await APIClient.shared.fetchEvents(from: from, to: to)
+            loadedFrom = from
+            loadedTo = to
             errorMessage = nil
             WidgetDataStore.update(from: events)
         } catch {
@@ -226,6 +237,9 @@ struct EventDetailView: View {
                         LabeledContent("Místo", value: location)
                     }
                     LabeledContent("Kdy", value: event.startAt.formatted(date: .abbreviated, time: .shortened))
+                    if let endAt = event.endAt {
+                        LabeledContent("Konec", value: endAt.formatted(date: .abbreviated, time: .shortened))
+                    }
                     LabeledContent("Autor") {
                         Text(isOwner ? "Ty" : (event.ownerName ?? "Neznámé jméno"))
                             .verifiedBadge(role: event.ownerRole)

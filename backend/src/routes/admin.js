@@ -1,9 +1,19 @@
 import { Router } from "express";
+import { timingSafeEqual, createHash } from "node:crypto";
 import { db } from "../db.js";
 import { requireUser, requireAdmin } from "../identity.js";
 import { notifyUser } from "../notifications.js";
 
 export const adminRouter = Router();
+
+// Hash both sides to a fixed length first — timingSafeEqual throws on a
+// length mismatch, and comparing raw lengths directly leaks a little
+// timing info of its own (how close a guess's length is to the secret's).
+function secretsMatch(a, b) {
+  const hashA = createHash("sha256").update(String(a)).digest();
+  const hashB = createHash("sha256").update(String(b)).digest();
+  return timingSafeEqual(hashA, hashB);
+}
 
 const setRole = db.prepare("UPDATE users SET role = ? WHERE id = ?");
 const getUser = db.prepare("SELECT * FROM users WHERE id = ?");
@@ -64,7 +74,7 @@ adminRouter.post("/bootstrap", requireUser, (req, res) => {
   if (!expected) {
     return res.status(503).json({ error: "ADMIN_BOOTSTRAP_SECRET is not configured" });
   }
-  if (req.header("X-Bootstrap-Secret") !== expected) {
+  if (!secretsMatch(req.header("X-Bootstrap-Secret") ?? "", expected)) {
     return res.status(403).json({ error: "invalid bootstrap secret" });
   }
 

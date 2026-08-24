@@ -6,6 +6,7 @@ struct SignInPromptView: View {
     var message = "Přihlas se přes Apple, ať můžeš procházet a reagovat na akce."
 
     @State private var errorMessage: String?
+    @State private var currentNonce: String?
     // Set by DeleteAccountView right before it signs out — stays true
     // (survives an app relaunch, since it's persisted, not just in-memory)
     // until a sign-in actually succeeds, so the reminder can't be missed.
@@ -39,7 +40,10 @@ struct SignInPromptView: View {
             }
 
             SignInWithAppleButton(.signIn) { request in
+                let nonce = SignInNonce.random()
+                currentNonce = nonce
                 request.requestedScopes = [.fullName]
+                request.nonce = SignInNonce.sha256(nonce)
             } onCompletion: { result in
                 handle(result)
             }
@@ -66,13 +70,17 @@ struct SignInPromptView: View {
                 errorMessage = "Přihlášení selhalo: chybí identity token"
                 return
             }
+            guard let nonce = currentNonce else {
+                errorMessage = "Přihlášení selhalo: chybí nonce"
+                return
+            }
             let fullName = credential.fullName.flatMap { components -> String? in
                 let formatted = PersonNameComponentsFormatter().string(from: components)
                 return formatted.isEmpty ? nil : formatted
             }
             Task {
                 do {
-                    try await AuthManager.shared.signIn(identityToken: identityToken, fullName: fullName)
+                    try await AuthManager.shared.signIn(identityToken: identityToken, fullName: fullName, nonce: nonce)
                     errorMessage = nil
                     justDeletedAccount = false
                 } catch {

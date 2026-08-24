@@ -10,6 +10,8 @@ struct NewEventView: View {
     @State private var location = ""
     @State private var coordinate: CLLocationCoordinate2D?
     @State private var startAt = Date()
+    @State private var hasEndTime = false
+    @State private var endAt = Date()
     @State private var isSubmitting = false
     @State private var errorMessage: String?
     @State private var didSubmit = false
@@ -45,6 +47,20 @@ struct NewEventView: View {
                         }
                     }
                     DatePicker("Kdy", selection: $startAt)
+                        .onChange(of: startAt) { _, newValue in
+                            if hasEndTime && endAt <= newValue {
+                                endAt = newValue.addingTimeInterval(3600)
+                            }
+                        }
+                    Toggle("Konec akce", isOn: $hasEndTime.animation())
+                        .onChange(of: hasEndTime) { _, newValue in
+                            if newValue && endAt <= startAt {
+                                endAt = startAt.addingTimeInterval(3600)
+                            }
+                        }
+                    if hasEndTime {
+                        DatePicker("Konec", selection: $endAt, in: startAt...)
+                    }
                 } header: {
                     Text("Akce")
                 } footer: {
@@ -99,6 +115,10 @@ struct NewEventView: View {
             coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lng)
         }
         startAt = event.startAt
+        if let existingEndAt = event.endAt {
+            hasEndTime = true
+            endAt = existingEndAt
+        }
     }
 
     private func submit() async {
@@ -111,7 +131,7 @@ struct NewEventView: View {
                 description: description.isEmpty ? nil : description,
                 location: location.isEmpty ? nil : location,
                 startAt: formatter.string(from: startAt),
-                endAt: nil,
+                endAt: hasEndTime ? formatter.string(from: endAt) : nil,
                 latitude: coordinate?.latitude,
                 longitude: coordinate?.longitude
             )

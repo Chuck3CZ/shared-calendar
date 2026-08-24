@@ -13,8 +13,9 @@ const insertUser = db.prepare(
 const setDisplayName = db.prepare(
   "UPDATE users SET display_name = ? WHERE id = ? AND display_name IS NULL"
 );
+const SESSION_TTL_DAYS = 90;
 const insertSession = db.prepare(
-  "INSERT INTO sessions (token, user_id) VALUES (?, ?)"
+  `INSERT INTO sessions (token, user_id, expires_at) VALUES (?, ?, datetime('now', '+${SESSION_TTL_DAYS} days'))`
 );
 
 // POST /auth/apple — exchange a Sign in with Apple identity token for a
@@ -22,14 +23,17 @@ const insertSession = db.prepare(
 // authorization for a given Apple ID + app, so we only use it to fill in
 // a still-empty display_name, never to overwrite one.
 authRouter.post("/apple", async (req, res) => {
-  const { identityToken, fullName } = req.body;
+  const { identityToken, fullName, nonce } = req.body;
   if (!identityToken) {
     return res.status(400).json({ error: "identityToken is required" });
+  }
+  if (!nonce) {
+    return res.status(400).json({ error: "nonce is required" });
   }
 
   let payload;
   try {
-    payload = await verifyAppleIdentityToken(identityToken);
+    payload = await verifyAppleIdentityToken(identityToken, nonce);
   } catch (err) {
     return res.status(401).json({ error: "invalid identity token", detail: err.message });
   }
