@@ -152,6 +152,8 @@ struct BugReport: Codable, Identifiable {
     let osVersion: String?
     let deviceModel: String?
     let createdAt: String
+    let githubIssueNumber: Int?
+    let githubIssueUrl: String?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -162,6 +164,8 @@ struct BugReport: Codable, Identifiable {
         case osVersion = "os_version"
         case deviceModel = "device_model"
         case createdAt = "created_at"
+        case githubIssueNumber = "github_issue_number"
+        case githubIssueUrl = "github_issue_url"
     }
 }
 

@@ -43,6 +43,12 @@ struct AdminBugReportsView: View {
                                 .font(.caption2)
                                 .foregroundStyle(.tertiary)
                         }
+                        if let number = report.githubIssueNumber, let urlString = report.githubIssueUrl, let url = URL(string: urlString) {
+                            Link(destination: url) {
+                                Label("Issue #\(number)", systemImage: "arrow.up.right.square")
+                            }
+                            .font(.caption)
+                        }
                     }
                     .padding(.vertical, 4)
                 }

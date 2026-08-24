@@ -94,7 +94,9 @@ db.exec(`
     app_version TEXT,
     os_version TEXT,
     device_model TEXT,
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    github_issue_number INTEGER,
+    github_issue_url TEXT
   );
 `);
 
@@ -112,6 +114,18 @@ try {
 
 try {
   db.exec("ALTER TABLE events ADD COLUMN longitude REAL");
+} catch {
+  // column already exists
+}
+
+try {
+  db.exec("ALTER TABLE bug_reports ADD COLUMN github_issue_number INTEGER");
+} catch {
+  // column already exists
+}
+
+try {
+  db.exec("ALTER TABLE bug_reports ADD COLUMN github_issue_url TEXT");
 } catch {
   // column already exists
 }
