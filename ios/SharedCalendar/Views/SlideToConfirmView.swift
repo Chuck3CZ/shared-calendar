@@ -56,7 +56,16 @@ struct SlideToConfirmView: View {
         .frame(height: thumbSize)
         .background(
             GeometryReader { proxy in
-                Color.clear.onAppear { trackWidth = proxy.size.width }
+                Color.clear
+                    .onAppear { trackWidth = proxy.size.width }
+                    // onAppear alone can catch a transitional (too-narrow)
+                    // size when this view mounts mid-animation, e.g. inside
+                    // a sheet that's still sliding into place — that stale
+                    // width then permanently caps how far the thumb can
+                    // travel, short of the capsule's actual right edge.
+                    .onChange(of: proxy.size.width) { _, newWidth in
+                        trackWidth = newWidth
+                    }
             }
         )
         .listRowInsets(EdgeInsets())
