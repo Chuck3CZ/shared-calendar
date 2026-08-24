@@ -18,6 +18,16 @@ struct ContentView: View {
         .sheet(item: $deepLinkRouter.pendingEvent) { event in
             EventDetailView(event: event)
         }
+        .sheet(isPresented: $deepLinkRouter.showingAdminBugReports) {
+            NavigationStack {
+                AdminBugReportsView()
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Zavřít") { deepLinkRouter.showingAdminBugReports = false }
+                        }
+                    }
+            }
+        }
         .onShake { showingBugReport = true }
         .sheet(isPresented: $showingBugReport) {
             BugReportView()

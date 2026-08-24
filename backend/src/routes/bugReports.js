@@ -30,7 +30,7 @@ bugReportsRouter.post("/", (req, res) => {
   notifyAdmins({
     title: "Nový bug report",
     body: trimmed.slice(0, 120),
-    data: {},
+    data: { type: "bug_report" },
   }).catch((error) => console.error("bug-report push failed:", error));
 
   createGithubIssue({

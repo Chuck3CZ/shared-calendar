@@ -36,4 +36,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
         [.banner, .sound, .list]
     }
+
+    /// Tapping a notification (banner, lock screen, or notification center)
+    /// used to just open the app to whatever screen was already showing —
+    /// reported as GitHub issue #2. Routes it to the right place instead.
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+        await DeepLinkRouter.shared.handle(pushUserInfo: response.notification.request.content.userInfo)
+    }
 }
