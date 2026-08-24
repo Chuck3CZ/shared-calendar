@@ -35,6 +35,14 @@ struct DeleteAccountView: View {
                     .foregroundStyle(.secondary)
                     .padding(.horizontal)
 
+                if currentStep == nil {
+                    Text("Přihlásíš se znovu stejným Apple ID? Apple appce jméno pošle jen napoprvé — tobě ho už jednou poslalo, takže při novém přihlášení zůstane prázdné, dokud appce nezrušíš přístup v Nastavení telefonu (Apple ID → Přihlášení a zabezpečení → Aplikace používající Apple ID).")
+                        .font(.caption)
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.tertiary)
+                        .padding(.horizontal)
+                }
+
                 if let currentStep {
                     VStack(alignment: .leading, spacing: 14) {
                         ForEach(Step.allCases, id: \.self) { step in
