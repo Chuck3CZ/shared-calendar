@@ -17,8 +17,15 @@ struct ProfileView: View {
     private var accepted: [RespondedEvent] { responses.filter { $0.status == "accepted" } }
     private var rejected: [RespondedEvent] { responses.filter { $0.status == "rejected" } }
 
+    /// The role the rest of the app should behave as — real role, except an
+    /// admin with "Testovat jako běžný uživatel" on sees and is gated
+    /// exactly like a basic account everywhere outside this screen.
+    private var effectiveRole: String? {
+        viewAsMember ? "basic" : profile?.role
+    }
+
     private var roleLabel: String {
-        switch profile?.role {
+        switch effectiveRole {
         case "admin": "Administrátor"
         case "verified": "Ověřený uživatel"
         case "basic": "Základní uživatel"
@@ -63,25 +70,27 @@ struct ProfileView: View {
                 Section {
                     Toggle("Testovat jako běžný uživatel", isOn: $viewAsMember)
                 } footer: {
-                    Text("Dočasně tě to ve swipe okně vrátí do role základního uživatele, aniž bys musel přepínat účty.")
+                    Text("Celá appka kromě týhle obrazovky se ti bude ukazovat a chovat, jako bys měl základní účet — admin sekce zmizí, akce půjde jen swipovat/prohlížet, vytváření a mazání se neuloží doopravdy.")
                 }
 
-                Section {
-                    NavigationLink("Správa uživatelů") {
-                        AdminUsersView()
+                if !viewAsMember {
+                    Section {
+                        NavigationLink("Správa uživatelů") {
+                            AdminUsersView()
+                        }
+                        NavigationLink("Bug reporty") {
+                            AdminBugReportsView()
+                        }
+                        NavigationLink("Nahlášené akce") {
+                            AdminEventReportsView()
+                        }
+                    } footer: {
+                        Text("Žádosti o ověření nových účtů se schvalují ve Správě uživatelů.")
                     }
-                    NavigationLink("Bug reporty") {
-                        AdminBugReportsView()
-                    }
-                    NavigationLink("Nahlášené akce") {
-                        AdminEventReportsView()
-                    }
-                } footer: {
-                    Text("Žádosti o ověření nových účtů se schvalují ve Správě uživatelů.")
                 }
             }
 
-            if profile?.role == "basic" {
+            if effectiveRole == "basic" {
                 Section {
                     if verificationStatus?.status == "pending" {
                         Text("Žádost čeká na schválení").foregroundStyle(.secondary)
@@ -189,7 +198,7 @@ struct ProfileView: View {
             async let responsesTask = APIClient.shared.fetchMyResponses()
             created = try await createdTask
             responses = try await responsesTask
-            if profile?.role == "basic" {
+            if effectiveRole == "basic" {
                 verificationStatus = try? await APIClient.shared.fetchVerificationStatus()
             }
             errorMessage = nil
@@ -200,6 +209,16 @@ struct ProfileView: View {
     }
 
     private func requestVerification() async {
+        // The backend would reject this for a real admin account (it only
+        // accepts requests from an actually-basic role) — same "nothing
+        // persisted" rule as swiping while testing as a member.
+        guard !viewAsMember else {
+            verificationStatus = VerificationRequest(
+                id: "preview", userId: profile?.id ?? "", reason: verificationReason.isEmpty ? nil : verificationReason,
+                status: "pending", createdAt: "", userDisplayName: profile?.displayName
+            )
+            return
+        }
         do {
             verificationStatus = try await APIClient.shared.requestVerification(
                 reason: verificationReason.isEmpty ? nil : verificationReason

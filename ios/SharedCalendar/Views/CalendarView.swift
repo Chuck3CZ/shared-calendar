@@ -188,9 +188,10 @@ struct EventDetailView: View {
     @State private var errorMessage: String?
     @State private var reminderMinutes: [Int] = []
     @State private var showingReportEvent = false
+    @AppStorage("viewAsMember") private var viewAsMember = false
 
     private var isOwner: Bool { auth.session?.profile.id == event.ownerId }
-    private var isAdmin: Bool { auth.session?.profile.role == "admin" }
+    private var isAdmin: Bool { auth.session?.profile.role == "admin" && !viewAsMember }
     private var isAttending: Bool { event.myStatus == "accepted" }
 
     /// A universal link — opens straight to this event's detail in the app
