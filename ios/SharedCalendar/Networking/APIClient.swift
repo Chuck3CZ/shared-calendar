@@ -168,6 +168,14 @@ final class APIClient {
         _ = try await request("me/notifications/read", method: "POST", authenticated: true)
     }
 
+    func deleteNotification(id: String) async throws {
+        _ = try await request("me/notifications/\(id)", method: "DELETE", authenticated: true)
+    }
+
+    func clearNotifications() async throws {
+        _ = try await request("me/notifications", method: "DELETE", authenticated: true)
+    }
+
     func submitBugReport(_ payload: BugReportPayload) async throws {
         let body = try encoder.encode(payload)
         _ = try await request("bug-reports", method: "POST", body: body, optionalAuth: true)

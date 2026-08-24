@@ -118,12 +118,16 @@ struct AppNotification: Codable, Identifiable {
     let eventId: String?
     let createdAt: String
     let readAt: String?
+    /// Non-nil (a timestamp) when the linked event has since been deleted —
+    /// lets the UI grey the row out instead of a tap silently doing nothing.
+    let eventDeletedAt: String?
 
     enum CodingKeys: String, CodingKey {
         case id, title, body
         case eventId = "event_id"
         case createdAt = "created_at"
         case readAt = "read_at"
+        case eventDeletedAt = "event_deleted_at"
     }
 }
 

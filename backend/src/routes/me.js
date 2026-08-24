@@ -36,12 +36,22 @@ const listResponsesForUser = db.prepare(`
   ORDER BY e.start_at ASC
 `);
 
+// event_deleted_at lets the app grey out (and skip fetching) a notification
+// whose event was soft-deleted since it was sent, instead of the tap just
+// silently doing nothing once GET /events/:id 404s.
 const listNotifications = db.prepare(`
-  SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 100
+  SELECT n.*, e.deleted_at AS event_deleted_at
+  FROM notifications n
+  LEFT JOIN events e ON e.id = n.event_id
+  WHERE n.user_id = ?
+  ORDER BY n.created_at DESC
+  LIMIT 100
 `);
 const markAllNotificationsRead = db.prepare(`
   UPDATE notifications SET read_at = datetime('now') WHERE user_id = ? AND read_at IS NULL
 `);
+const deleteNotification = db.prepare("DELETE FROM notifications WHERE id = ? AND user_id = ?");
+const deleteAllNotifications = db.prepare("DELETE FROM notifications WHERE user_id = ?");
 
 const countAdmins = db.prepare("SELECT COUNT(*) AS count FROM users WHERE role = 'admin'");
 
@@ -149,6 +159,18 @@ meRouter.get("/notifications", requireUser, (req, res) => {
 // POST /me/notifications/read — marks everything currently unread as read.
 meRouter.post("/notifications/read", requireUser, (req, res) => {
   markAllNotificationsRead.run(req.user.id);
+  res.status(204).end();
+});
+
+// DELETE /me/notifications — clears the whole history (the "Vymazat vše" button).
+meRouter.delete("/notifications", requireUser, (req, res) => {
+  deleteAllNotifications.run(req.user.id);
+  res.status(204).end();
+});
+
+// DELETE /me/notifications/:id — swipe-to-delete a single entry.
+meRouter.delete("/notifications/:id", requireUser, (req, res) => {
+  deleteNotification.run(req.params.id, req.user.id);
   res.status(204).end();
 });
 

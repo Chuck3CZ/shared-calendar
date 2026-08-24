@@ -7,6 +7,8 @@ struct NotificationHistoryView: View {
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var detailEvent: Event?
+    @State private var showingClearAllConfirm = false
+    @State private var didDelete = false
     @Environment(\.dismiss) private var dismiss
 
     private static let displayFormatter: DateFormatter = {
@@ -28,22 +30,35 @@ struct NotificationHistoryView: View {
                         description: Text("Tady se objeví, až ti něco přijde")
                     )
                 } else {
-                    List(notifications) { item in
-                        Button {
-                            guard let eventId = item.eventId else { return }
-                            Task { detailEvent = try? await APIClient.shared.fetchEvent(id: eventId) }
-                        } label: {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(item.title).font(.headline)
-                                Text(item.body).font(.subheadline).foregroundStyle(.secondary)
-                                Text(relativeDate(item.createdAt))
+                    List {
+                        ForEach(notifications) { item in
+                            let eventGone = item.eventDeletedAt != nil
+                            Button {
+                                guard let eventId = item.eventId, !eventGone else { return }
+                                Task { detailEvent = try? await APIClient.shared.fetchEvent(id: eventId) }
+                            } label: {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(item.title).font(.headline)
+                                    Text(item.body).font(.subheadline).foregroundStyle(.secondary)
+                                    HStack(spacing: 6) {
+                                        Text(relativeDate(item.createdAt))
+                                        if eventGone {
+                                            Text("· akce smazána")
+                                        }
+                                    }
                                     .font(.caption)
                                     .foregroundStyle(.tertiary)
+                                }
+                                .padding(.vertical, 2)
                             }
-                            .padding(.vertical, 2)
+                            .buttonStyle(.plain)
+                            .foregroundStyle(eventGone ? .secondary : .primary)
+                            .swipeActions {
+                                Button("Smazat", role: .destructive) {
+                                    Task { await delete(item) }
+                                }
+                            }
                         }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.primary)
                     }
                 }
             }
@@ -52,11 +67,24 @@ struct NotificationHistoryView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Zavřít") { dismiss() }
                 }
+                if !notifications.isEmpty {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Vymazat vše", role: .destructive) {
+                            showingClearAllConfirm = true
+                        }
+                    }
+                }
+            }
+            .confirmationDialog("Vymazat všechny notifikace?", isPresented: $showingClearAllConfirm, titleVisibility: .visible) {
+                Button("Vymazat vše", role: .destructive) {
+                    Task { await clearAll() }
+                }
             }
             .sheet(item: $detailEvent) { event in
                 EventDetailView(event: event)
             }
             .task { await load() }
+            .sensoryFeedback(.impact(weight: .light), trigger: didDelete)
         }
     }
 
@@ -75,6 +103,32 @@ struct NotificationHistoryView: View {
         } catch {
             guard !error.isCancellation else { return }
             errorMessage = "Nepodařilo se načíst notifikace: \(error.localizedDescription)"
+        }
+    }
+
+    private func delete(_ item: AppNotification) async {
+        // Removed from the list right away — a failed delete just leaves it
+        // there after the next load rather than needing a rollback dance.
+        notifications.removeAll { $0.id == item.id }
+        didDelete = true
+        do {
+            try await APIClient.shared.deleteNotification(id: item.id)
+        } catch {
+            guard !error.isCancellation else { return }
+            errorMessage = "Nepodařilo se smazat notifikaci: \(error.localizedDescription)"
+        }
+    }
+
+    private func clearAll() async {
+        let previous = notifications
+        notifications = []
+        didDelete = true
+        do {
+            try await APIClient.shared.clearNotifications()
+        } catch {
+            guard !error.isCancellation else { return }
+            notifications = previous
+            errorMessage = "Nepodařilo se vymazat notifikace: \(error.localizedDescription)"
         }
     }
 }
