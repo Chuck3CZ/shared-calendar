@@ -172,6 +172,13 @@ private struct MonthCalendarView: View {
     @Binding var displayedMonth: Date
     let eventDays: Set<DateComponents>
 
+    // Which edge the incoming month slides in from — set right before
+    // displayedMonth changes so the whole grid pages like a deck of cards,
+    // instead of every cell individually cross-fading its number in place.
+    @State private var incomingEdge: Edge = .trailing
+    @State private var showingDatePicker = false
+    @State private var pickerDate = Date()
+
     private let calendar = Calendar.current
 
     private var days: [Date] {
@@ -210,8 +217,14 @@ private struct MonthCalendarView: View {
                     Image(systemName: "chevron.left")
                 }
                 Spacer()
-                Text(monthTitle)
-                    .font(.headline)
+                Button {
+                    pickerDate = displayedMonth
+                    showingDatePicker = true
+                } label: {
+                    Text(monthTitle)
+                        .font(.headline)
+                }
+                .buttonStyle(.plain)
                 Spacer()
                 Button {
                     changeMonth(by: 1)
@@ -234,6 +247,12 @@ private struct MonthCalendarView: View {
                     dayCell(for: date)
                 }
             }
+            .id(displayedMonth)
+            .transition(.asymmetric(
+                insertion: .move(edge: incomingEdge),
+                removal: .move(edge: incomingEdge == .trailing ? .leading : .trailing)
+            ))
+            .clipped()
         }
         .padding(.horizontal)
         .contentShape(Rectangle())
@@ -244,6 +263,36 @@ private struct MonthCalendarView: View {
                     changeMonth(by: value.translation.width < 0 ? 1 : -1)
                 }
         )
+        .sheet(isPresented: $showingDatePicker) {
+            NavigationStack {
+                DatePicker("Datum", selection: $pickerDate, displayedComponents: .date)
+                    .datePickerStyle(.wheel)
+                    .labelsHidden()
+                    .padding()
+                    .navigationTitle("Přejít na datum")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Zrušit") { showingDatePicker = false }
+                        }
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Přejít") {
+                                jump(to: pickerDate)
+                                showingDatePicker = false
+                            }
+                        }
+                    }
+            }
+            .presentationDetents([.height(320)])
+        }
+    }
+
+    private func jump(to date: Date) {
+        selectedDate = date
+        incomingEdge = date > displayedMonth ? .trailing : .leading
+        withAnimation(.easeInOut(duration: 0.25)) {
+            displayedMonth = date
+        }
     }
 
     @ViewBuilder
@@ -280,8 +329,10 @@ private struct MonthCalendarView: View {
     }
 
     private func changeMonth(by value: Int) {
-        if let newMonth = calendar.date(byAdding: .month, value: value, to: displayedMonth) {
-            withAnimation(.default) { displayedMonth = newMonth }
+        guard let newMonth = calendar.date(byAdding: .month, value: value, to: displayedMonth) else { return }
+        incomingEdge = value > 0 ? .trailing : .leading
+        withAnimation(.easeInOut(duration: 0.25)) {
+            displayedMonth = newMonth
         }
     }
 }
