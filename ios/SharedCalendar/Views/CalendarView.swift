@@ -82,6 +82,7 @@ struct CalendarView: View {
                         }
                     }
                 }
+                .listStyle(.plain)
             }
             .navigationTitle("Kalendář")
             .toolbar {
@@ -235,6 +236,14 @@ private struct MonthCalendarView: View {
             }
         }
         .padding(.horizontal)
+        .contentShape(Rectangle())
+        .gesture(
+            DragGesture(minimumDistance: 24)
+                .onEnded { value in
+                    guard abs(value.translation.width) > abs(value.translation.height) else { return }
+                    changeMonth(by: value.translation.width < 0 ? 1 : -1)
+                }
+        )
     }
 
     @ViewBuilder
@@ -272,7 +281,7 @@ private struct MonthCalendarView: View {
 
     private func changeMonth(by value: Int) {
         if let newMonth = calendar.date(byAdding: .month, value: value, to: displayedMonth) {
-            displayedMonth = newMonth
+            withAnimation(.default) { displayedMonth = newMonth }
         }
     }
 }
