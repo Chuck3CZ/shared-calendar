@@ -12,6 +12,7 @@ func openInMaps(latitude: Double, longitude: Double, name: String) {
 struct CalendarView: View {
     @ObservedObject private var auth = AuthManager.shared
     @State private var selectedDate = Date()
+    @State private var displayedMonth = Date()
     @State private var events: [Event] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
@@ -20,15 +21,9 @@ struct CalendarView: View {
     @State private var editingEvent: Event?
     @State private var detailEvent: Event?
     @AppStorage("viewAsMember") private var viewAsMember = false
-    @Environment(\.scenePhase) private var scenePhase
-    // The graphical DatePicker (backed by UICalendarView) has a known bug
-    // where a day's number can render blank after the app returns from the
-    // background, only fixing itself once that cell is interacted with.
-    // Forcing SwiftUI to recreate it on foreground works around that.
-    @State private var datePickerRefreshID = UUID()
-    // The window actually fetched — selectedDate can wander anywhere via
-    // the graphical DatePicker, well outside it, so it needs tracking to
-    // know when a refetch centered on the new date is actually due.
+    // The window actually fetched — displayedMonth can wander anywhere via
+    // the month navigation arrows, well outside it, so it needs tracking to
+    // know when a refetch centered on the new month is actually due.
     @State private var loadedFrom: Date?
     @State private var loadedTo: Date?
 
@@ -38,20 +33,15 @@ struct CalendarView: View {
             .sorted { $0.startAt < $1.startAt }
     }
 
+    private var eventDays: Set<DateComponents> {
+        Set(events.map { Calendar.current.dateComponents([.year, .month, .day], from: $0.startAt) })
+    }
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                DatePicker("Datum", selection: $selectedDate, displayedComponents: .date)
-                    .datePickerStyle(.graphical)
-                    .padding(.horizontal)
-                    .id(datePickerRefreshID)
-                    // UICalendarView sizes its own cells to however many
-                    // weeks the visible month needs (4 vs 6), so text and
-                    // grid spacing visibly jump when switching months. A
-                    // fixed height doesn't stop that internal resizing, but
-                    // it does stop the rest of the page from jumping along
-                    // with it.
-                    .frame(height: 360)
+                MonthCalendarView(selectedDate: $selectedDate, displayedMonth: $displayedMonth, eventDays: eventDays)
+                    .padding(.vertical, 8)
 
                 List {
                     if let errorMessage {
@@ -143,13 +133,9 @@ struct CalendarView: View {
             }
             .task { await load() }
             .refreshable { await load() }
-            .onChange(of: scenePhase) { _, newPhase in
-                guard newPhase == .active else { return }
-                datePickerRefreshID = UUID()
-            }
-            .onChange(of: selectedDate) { _, newDate in
-                guard let loadedFrom, let loadedTo, !(loadedFrom...loadedTo).contains(newDate) else { return }
-                Task { await load(around: newDate) }
+            .onChange(of: displayedMonth) { _, newMonth in
+                guard let loadedFrom, let loadedTo, !(loadedFrom...loadedTo).contains(newMonth) else { return }
+                Task { await load(around: newMonth) }
             }
         }
     }
@@ -169,6 +155,124 @@ struct CalendarView: View {
         } catch {
             guard !error.isCancellation else { return }
             errorMessage = "Nepodařilo se načíst akce: \(error.localizedDescription)"
+        }
+    }
+}
+
+/// A custom month grid, replacing SwiftUI's `DatePicker(.graphical)`
+/// (backed by UIKit's `UICalendarView`). That system component can't show
+/// per-day decorations and has its own layout bugs — it resizes its cell
+/// grid to however many weeks a month needs (4 vs 6), and in landscape that
+/// internal resizing can leave the grid shifted and cell spacing uneven
+/// between adjacent months. Always laying out a fixed 6-week (42-day) grid
+/// here avoids both.
+private struct MonthCalendarView: View {
+    @Binding var selectedDate: Date
+    @Binding var displayedMonth: Date
+    let eventDays: Set<DateComponents>
+
+    private let calendar = Calendar.current
+
+    private var days: [Date] {
+        guard let monthInterval = calendar.dateInterval(of: .month, for: displayedMonth),
+              let firstWeek = calendar.dateInterval(of: .weekOfMonth, for: monthInterval.start) else {
+            return []
+        }
+        return (0..<42).compactMap { calendar.date(byAdding: .day, value: $0, to: firstWeek.start) }
+    }
+
+    private var weekdaySymbols: [String] {
+        var czechCalendar = calendar
+        czechCalendar.locale = Locale(identifier: "cs_CZ")
+        let symbols = czechCalendar.veryShortWeekdaySymbols
+        let firstWeekdayIndex = calendar.firstWeekday - 1
+        return Array(symbols[firstWeekdayIndex...] + symbols[..<firstWeekdayIndex])
+    }
+
+    private var monthTitle: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "cs_CZ")
+        formatter.dateFormat = "LLLL yyyy"
+        return formatter.string(from: displayedMonth).capitalized(with: Locale(identifier: "cs_CZ"))
+    }
+
+    private func hasEvent(on date: Date) -> Bool {
+        eventDays.contains(calendar.dateComponents([.year, .month, .day], from: date))
+    }
+
+    var body: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Button {
+                    changeMonth(by: -1)
+                } label: {
+                    Image(systemName: "chevron.left")
+                }
+                Spacer()
+                Text(monthTitle)
+                    .font(.headline)
+                Spacer()
+                Button {
+                    changeMonth(by: 1)
+                } label: {
+                    Image(systemName: "chevron.right")
+                }
+            }
+
+            HStack(spacing: 0) {
+                ForEach(Array(weekdaySymbols.enumerated()), id: \.offset) { _, symbol in
+                    Text(symbol)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity)
+                }
+            }
+
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 7), spacing: 4) {
+                ForEach(days, id: \.self) { date in
+                    dayCell(for: date)
+                }
+            }
+        }
+        .padding(.horizontal)
+    }
+
+    @ViewBuilder
+    private func dayCell(for date: Date) -> some View {
+        let isInDisplayedMonth = calendar.isDate(date, equalTo: displayedMonth, toGranularity: .month)
+        let isSelected = calendar.isDate(date, inSameDayAs: selectedDate)
+        let isToday = calendar.isDateInToday(date)
+
+        Button {
+            selectedDate = date
+        } label: {
+            VStack(spacing: 4) {
+                Text("\(calendar.component(.day, from: date))")
+                    .font(.body)
+                    .fontWeight(isToday ? .bold : .regular)
+                    .frame(width: 32, height: 32)
+                    .foregroundStyle(isSelected ? Color.white : (isInDisplayedMonth ? Color.primary : Color.secondary.opacity(0.4)))
+                    .background {
+                        if isSelected {
+                            Circle().fill(Color.accentColor)
+                        } else if isToday {
+                            Circle().stroke(Color.accentColor, lineWidth: 1)
+                        }
+                    }
+
+                Circle()
+                    .fill(Color.accentColor)
+                    .frame(width: 5, height: 5)
+                    .opacity(hasEvent(on: date) ? 1 : 0)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func changeMonth(by value: Int) {
+        if let newMonth = calendar.date(byAdding: .month, value: value, to: displayedMonth) {
+            displayedMonth = newMonth
         }
     }
 }
