@@ -7,6 +7,10 @@ import { refreshWeatherForEvent } from "../weather.js";
 
 export const eventsRouter = Router();
 
+// Keep in sync with EventCategory in the iOS app (Models/Event.swift).
+const ALLOWED_CATEGORIES = ["rodina", "prace", "sport", "oslava", "cestovani", "ostatni"];
+const DEFAULT_CATEGORY = "ostatni";
+
 const listEvents = db.prepare(`
   SELECT e.*, u.display_name AS owner_name, u.role AS owner_role,
     (SELECT r.status FROM event_responses r WHERE r.event_id = e.id AND r.user_id = ?) AS my_status,
@@ -18,12 +22,12 @@ const listEvents = db.prepare(`
 `);
 
 const insertEvent = db.prepare(`
-  INSERT INTO events (id, owner_id, title, description, location, start_at, end_at, latitude, longitude)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  INSERT INTO events (id, owner_id, title, description, location, start_at, end_at, latitude, longitude, category)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 
 const updateEvent = db.prepare(`
-  UPDATE events SET title = ?, description = ?, location = ?, start_at = ?, end_at = ?, latitude = ?, longitude = ?
+  UPDATE events SET title = ?, description = ?, location = ?, start_at = ?, end_at = ?, latitude = ?, longitude = ?, category = ?
   WHERE id = ? AND owner_id = ?
 `);
 
@@ -145,7 +149,7 @@ function eventTimesError(start_at, end_at) {
 
 // POST /events — create an event (requires identity)
 eventsRouter.post("/", requireUser, (req, res) => {
-  const { title, description, location, start_at, end_at, latitude, longitude } = req.body;
+  const { title, description, location, start_at, end_at, latitude, longitude, category } = req.body;
   if (!title || !start_at) {
     return res.status(400).json({ error: "title and start_at are required" });
   }
@@ -155,6 +159,9 @@ eventsRouter.post("/", requireUser, (req, res) => {
   const timesError = eventTimesError(start_at, end_at);
   if (timesError) {
     return res.status(400).json({ error: timesError });
+  }
+  if (category != null && !ALLOWED_CATEGORIES.includes(category)) {
+    return res.status(400).json({ error: `category must be one of ${ALLOWED_CATEGORIES.join(", ")}` });
   }
 
   if (req.user.role === "basic") {
@@ -170,7 +177,7 @@ eventsRouter.post("/", requireUser, (req, res) => {
   const id = randomUUID();
   insertEvent.run(
     id, req.user.id, title, description ?? null, location ?? null, start_at, end_at ?? null,
-    latitude ?? null, longitude ?? null
+    latitude ?? null, longitude ?? null, category ?? DEFAULT_CATEGORY
   );
 
   notifyOtherUsers(req.user.id, {
@@ -279,7 +286,7 @@ eventsRouter.patch("/:id", requireUser, (req, res) => {
     return res.status(403).json({ error: "you can only edit your own events" });
   }
 
-  const { title, description, location, start_at, end_at, latitude, longitude } = req.body;
+  const { title, description, location, start_at, end_at, latitude, longitude, category } = req.body;
   if (!title || !start_at) {
     return res.status(400).json({ error: "title and start_at are required" });
   }
@@ -290,12 +297,16 @@ eventsRouter.patch("/:id", requireUser, (req, res) => {
   if (timesError) {
     return res.status(400).json({ error: timesError });
   }
+  if (category != null && !ALLOWED_CATEGORIES.includes(category)) {
+    return res.status(400).json({ error: `category must be one of ${ALLOWED_CATEGORIES.join(", ")}` });
+  }
 
   // Matched by the event's actual owner, not the requester — otherwise an
   // admin editing someone else's event would silently update zero rows.
   updateEvent.run(
     title, description ?? null, location ?? null, start_at, end_at ?? null,
-    latitude ?? null, longitude ?? null, event.id, event.owner_id
+    latitude ?? null, longitude ?? null, category ?? event.category ?? DEFAULT_CATEGORY,
+    event.id, event.owner_id
   );
 
   for (const { user_id } of listAcceptedAttendees.all(event.id, req.user.id)) {

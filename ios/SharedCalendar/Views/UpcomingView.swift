@@ -52,7 +52,11 @@ struct UpcomingView: View {
                                 } label: {
                                     HStack {
                                         VStack(alignment: .leading, spacing: 4) {
-                                            Text(event.title).font(.headline)
+                                            HStack(spacing: 6) {
+                                                Image(systemName: event.category.icon)
+                                                    .foregroundStyle(event.category.color)
+                                                Text(event.title).font(.headline)
+                                            }
                                             Text(event.startAt.formatted(date: .omitted, time: .shortened))
                                                 .font(.subheadline)
                                                 .foregroundStyle(.secondary)

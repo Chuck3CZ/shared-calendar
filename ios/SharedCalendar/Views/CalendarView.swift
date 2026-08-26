@@ -20,69 +20,113 @@ struct CalendarView: View {
     @State private var showingNotifications = false
     @State private var editingEvent: Event?
     @State private var detailEvent: Event?
+    @State private var showingSearch = false
+    @State private var searchText = ""
+    @State private var categoryFilter: EventCategory?
     @AppStorage("viewAsMember") private var viewAsMember = false
 
     private var events: [Event] { repository.events }
 
+    /// All the other derived lists start from this, so a category filter
+    /// affects the day list, the calendar dots, and search results alike.
+    private var visibleEvents: [Event] {
+        guard let categoryFilter else { return events }
+        return events.filter { $0.category == categoryFilter }
+    }
+
     private var eventsForSelectedDay: [Event] {
-        events
+        visibleEvents
             .filter { Calendar.current.isDate($0.startAt, inSameDayAs: selectedDate) }
             .sorted { $0.startAt < $1.startAt }
     }
 
-    private var eventDays: Set<DateComponents> {
-        Set(events.map { Calendar.current.dateComponents([.year, .month, .day], from: $0.startAt) })
+    private var searchResults: [Event] {
+        let needle = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !needle.isEmpty else { return [] }
+        return visibleEvents
+            .filter {
+                $0.title.localizedCaseInsensitiveContains(needle)
+                    || ($0.location?.localizedCaseInsensitiveContains(needle) ?? false)
+            }
+            .sorted { $0.startAt < $1.startAt }
+    }
+
+    private var eventCategoriesByDay: [DateComponents: [EventCategory]] {
+        var raw: [DateComponents: Set<EventCategory>] = [:]
+        for event in visibleEvents {
+            let comps = Calendar.current.dateComponents([.year, .month, .day], from: event.startAt)
+            raw[comps, default: []].insert(event.category)
+        }
+        return raw.mapValues { categories in EventCategory.allCases.filter { categories.contains($0) } }
     }
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                MonthCalendarView(selectedDate: $selectedDate, displayedMonth: $displayedMonth, eventDays: eventDays)
+                MonthCalendarView(selectedDate: $selectedDate, displayedMonth: $displayedMonth, eventCategoriesByDay: eventCategoriesByDay)
                     .padding(.vertical, 8)
 
                 List {
-                    if events.isEmpty, let errorMessage {
+                    if !searchText.isEmpty {
+                        if searchResults.isEmpty {
+                            Text("Nic nenalezeno").foregroundStyle(.secondary)
+                        } else {
+                            ForEach(searchResults) { event in
+                                EventRow(event: event, showDate: true) { detailEvent = event }
+                            }
+                        }
+                    } else if events.isEmpty, let errorMessage {
                         Text(errorMessage).foregroundStyle(.red)
                     } else if eventsForSelectedDay.isEmpty {
                         Text("Žádné akce tento den").foregroundStyle(.secondary)
                     } else {
                         ForEach(eventsForSelectedDay) { event in
-                            Button {
-                                detailEvent = event
-                            } label: {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(event.title).font(.headline)
-                                        Text(event.startAt.formatted(date: .omitted, time: .shortened))
-                                            .font(.subheadline)
-                                            .foregroundStyle(.secondary)
-                                        if let location = event.location {
-                                            Text(location).font(.caption).foregroundStyle(.secondary)
-                                        }
-                                    }
-                                    Spacer()
-                                    if event.myStatus == "accepted" {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundStyle(.green)
-                                    } else if event.myStatus == "rejected" {
-                                        Image(systemName: "xmark.circle.fill")
-                                            .foregroundStyle(.red)
-                                    }
-                                    Image(systemName: "chevron.right")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-                            .foregroundStyle(.primary)
+                            EventRow(event: event, showDate: false) { detailEvent = event }
                         }
                     }
                 }
                 .listStyle(.plain)
             }
             .navigationTitle("Kalendář")
+            .searchable(text: $searchText, isPresented: $showingSearch, prompt: "Hledat akce")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showingSearch = true
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                    }
+                    .accessibilityLabel("Hledat akce")
+                }
+                ToolbarItem(placement: .topBarLeading) {
+                    Menu {
+                        Button {
+                            categoryFilter = nil
+                        } label: {
+                            if categoryFilter == nil {
+                                Label("Vše", systemImage: "checkmark")
+                            } else {
+                                Text("Vše")
+                            }
+                        }
+                        Divider()
+                        ForEach(EventCategory.allCases) { option in
+                            Button {
+                                categoryFilter = option
+                            } label: {
+                                if categoryFilter == option {
+                                    Label(option.displayName, systemImage: "checkmark")
+                                } else {
+                                    Label(option.displayName, systemImage: option.icon)
+                                }
+                            }
+                        }
+                    } label: {
+                        Image(systemName: categoryFilter == nil ? "line.3.horizontal.decrease.circle" : "line.3.horizontal.decrease.circle.fill")
+                            .foregroundStyle(categoryFilter?.color ?? .primary)
+                    }
+                    .accessibilityLabel("Filtrovat podle kategorie")
+                }
                 if auth.isSignedIn {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
@@ -157,6 +201,52 @@ struct CalendarView: View {
     }
 }
 
+/// One row in the day list or in search results. `showDate` switches the
+/// subtitle from just a time (day list, where the day is already implied by
+/// the selected date) to a full date + time (search results, which can span
+/// any day).
+private struct EventRow: View {
+    let event: Event
+    var showDate: Bool = false
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 6) {
+                        Image(systemName: event.category.icon)
+                            .foregroundStyle(event.category.color)
+                        Text(event.title).font(.headline)
+                    }
+                    Text(showDate
+                        ? event.startAt.formatted(date: .abbreviated, time: .shortened)
+                        : event.startAt.formatted(date: .omitted, time: .shortened))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    if let location = event.location {
+                        Text(location).font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                Spacer()
+                if event.myStatus == "accepted" {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                } else if event.myStatus == "rejected" {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.red)
+                }
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(.primary)
+    }
+}
+
 /// A custom month grid, replacing SwiftUI's `DatePicker(.graphical)`
 /// (backed by UIKit's `UICalendarView`). That system component can't show
 /// per-day decorations and has its own layout bugs — it resizes its cell
@@ -167,7 +257,7 @@ struct CalendarView: View {
 private struct MonthCalendarView: View {
     @Binding var selectedDate: Date
     @Binding var displayedMonth: Date
-    let eventDays: Set<DateComponents>
+    let eventCategoriesByDay: [DateComponents: [EventCategory]]
 
     // Which edge the incoming month slides in from — set right before
     // displayedMonth changes so the whole grid pages like a deck of cards,
@@ -201,8 +291,8 @@ private struct MonthCalendarView: View {
         return formatter.string(from: displayedMonth).capitalized(with: Locale(identifier: "cs_CZ"))
     }
 
-    private func hasEvent(on date: Date) -> Bool {
-        eventDays.contains(calendar.dateComponents([.year, .month, .day], from: date))
+    private func categories(on date: Date) -> [EventCategory] {
+        eventCategoriesByDay[calendar.dateComponents([.year, .month, .day], from: date)] ?? []
     }
 
     var body: some View {
@@ -315,10 +405,12 @@ private struct MonthCalendarView: View {
                         }
                     }
 
-                Circle()
-                    .fill(Color.accentColor)
-                    .frame(width: 5, height: 5)
-                    .opacity(hasEvent(on: date) ? 1 : 0)
+                HStack(spacing: 3) {
+                    ForEach(categories(on: date).prefix(3)) { category in
+                        Circle().fill(category.color).frame(width: 5, height: 5)
+                    }
+                }
+                .frame(height: 5)
             }
             .frame(maxWidth: .infinity)
         }
@@ -398,26 +490,26 @@ struct EventDetailView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Akce") {
-                    LabeledContent("Název") { CopyableValue(text: event.title) }
+                Section {
+                    LabeledContent("Název") { CopyableValue(text: event.title, bold: true) }
+                    LabeledContent("Kategorie") {
+                        Label(event.category.displayName, systemImage: event.category.icon)
+                            .foregroundStyle(event.category.color)
+                    }
                     if let description = event.description, !description.isEmpty {
                         LabeledContent("Popis", value: description)
-                    }
-                    if let location = event.location, !location.isEmpty {
-                        LabeledContent("Místo") { CopyableValue(text: location) }
                     }
                     LabeledContent("Kdy", value: event.startAt.formatted(date: .abbreviated, time: .shortened))
                     if let endAt = event.endAt {
                         LabeledContent("Konec", value: endAt.formatted(date: .abbreviated, time: .shortened))
                     }
-                    LabeledContent("Autor") {
-                        Text(isOwner ? "Ty" : (event.ownerName ?? "Neznámé jméno"))
-                            .verifiedBadge(role: event.ownerRole)
-                    }
                     if let acceptedCount = event.acceptedCount, acceptedCount > 0 {
                         LabeledContent("Zúčastní se") {
                             Label("\(acceptedCount)", systemImage: "person.2.fill")
                         }
+                    }
+                    if let location = event.location, !location.isEmpty {
+                        LabeledContent("Místo") { CopyableValue(text: location) }
                     }
                     if let latitude = event.latitude, let longitude = event.longitude {
                         Button {
@@ -438,6 +530,9 @@ struct EventDetailView: View {
                             openInMaps(latitude: latitude, longitude: longitude, name: event.location ?? event.title)
                         }
                     }
+                } header: {
+                    Text(isOwner ? "Akci vytvořil: Ty" : "Akci vytvořil: \(event.ownerName ?? "Neznámé jméno")")
+                        .verifiedBadge(role: event.ownerRole)
                 }
 
                 if isAttending {

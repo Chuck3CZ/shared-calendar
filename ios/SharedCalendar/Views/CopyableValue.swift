@@ -7,6 +7,7 @@ import UIKit
 /// tapping again (or waiting it out) either copies or just disarms.
 struct CopyableValue: View {
     let text: String
+    var bold: Bool = false
 
     @State private var isArmed = false
     @State private var didCopy = false
@@ -31,6 +32,7 @@ struct CopyableValue: View {
         } label: {
             VStack(alignment: .trailing, spacing: 2) {
                 Text(text)
+                    .fontWeight(bold ? .bold : .regular)
                     .multilineTextAlignment(.trailing)
                 if isArmed {
                     Text("Klepni znovu pro zkopírování")

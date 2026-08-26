@@ -168,3 +168,9 @@ for (const column of [
     // column already exists
   }
 }
+
+try {
+  db.exec("ALTER TABLE events ADD COLUMN category TEXT NOT NULL DEFAULT 'ostatni'");
+} catch {
+  // column already exists
+}

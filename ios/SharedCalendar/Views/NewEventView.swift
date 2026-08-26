@@ -10,6 +10,7 @@ struct NewEventView: View {
     @State private var location = ""
     @State private var coordinate: CLLocationCoordinate2D?
     @State private var startAt: Date
+    @State private var category: EventCategory = .ostatni
     @State private var hasEndTime = false
     @State private var endAt = Date()
     @State private var isSubmitting = false
@@ -65,6 +66,16 @@ struct NewEventView: View {
                         Button("Odebrat místo", role: .destructive) {
                             location = ""
                             coordinate = nil
+                        }
+                    }
+                    Picker("Kategorie", selection: $category) {
+                        ForEach(EventCategory.allCases) { option in
+                            Label {
+                                Text(option.displayName)
+                            } icon: {
+                                Image(systemName: option.icon).foregroundStyle(option.color)
+                            }
+                            .tag(option)
                         }
                     }
                     DatePicker("Kdy", selection: $startAt)
@@ -136,6 +147,7 @@ struct NewEventView: View {
             coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lng)
         }
         startAt = event.startAt
+        category = event.category
         if let existingEndAt = event.endAt {
             hasEndTime = true
             endAt = existingEndAt
@@ -154,7 +166,8 @@ struct NewEventView: View {
                 startAt: formatter.string(from: startAt),
                 endAt: hasEndTime ? formatter.string(from: endAt) : nil,
                 latitude: coordinate?.latitude,
-                longitude: coordinate?.longitude
+                longitude: coordinate?.longitude,
+                category: category.rawValue
             )
             if let event = eventToEdit {
                 _ = try await APIClient.shared.updateEvent(id: event.id, payload)

@@ -15,6 +15,7 @@
 		2B721A0DB90FB11444E14E49 /* LocationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0FADD63C4F32A55F485636 /* LocationPickerView.swift */; };
 		330F328FB34F0B9B868E8218 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5D6AD1C0FAF961018BA7C5 /* ContentView.swift */; };
 		3752629E2BF10E3ACA078EB6 /* WidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 386D79CCC56E9EF9668E555A /* WidgetDataStore.swift */; };
+		377A319E04881017D2EAD2F0 /* EventCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A467AB342DB4E4F594229D79 /* EventCategory.swift */; };
 		3931C6036739D511D2DED66E /* WidgetDataStore+Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 655C89AB68AE1A58B4072E4D /* WidgetDataStore+Events.swift */; };
 		3A9452C4B610C8D6BE6AB67B /* ServerDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2873AC5C152E5C24E34F465D /* ServerDate.swift */; };
 		3C93DEE52589F720B4B165A9 /* DeepLinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2E5BF975131F6C2313DFAFA /* DeepLinkRouter.swift */; };
@@ -108,6 +109,7 @@
 		9907B5FDD9F5BB072AA56D2A /* SharedCalendarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCalendarApp.swift; sourceTree = "<group>"; };
 		9A5D6AD1C0FAF961018BA7C5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		9FEEA6E4E83F1460F4581A23 /* KeychainSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainSession.swift; sourceTree = "<group>"; };
+		A467AB342DB4E4F594229D79 /* EventCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventCategory.swift; sourceTree = "<group>"; };
 		A99B608CAAC941ABFB426701 /* NewEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewEventView.swift; sourceTree = "<group>"; };
 		B203EF495E74B7A751A0E592 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 		B7EF376F1EBB65E771927353 /* CopyableValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopyableValue.swift; sourceTree = "<group>"; };
@@ -255,6 +257,7 @@
 			isa = PBXGroup;
 			children = (
 				EDA24C6C582D3AB311CEB227 /* Event.swift */,
+				A467AB342DB4E4F594229D79 /* EventCategory.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -430,6 +433,7 @@
 				3C93DEE52589F720B4B165A9 /* DeepLinkRouter.swift in Sources */,
 				A2C7490A2949CEA90C6160EE /* DeleteAccountView.swift in Sources */,
 				A810425834DA17BAB893E65F /* Event.swift in Sources */,
+				377A319E04881017D2EAD2F0 /* EventCategory.swift in Sources */,
 				A49B96D105C10E9AA2F4FF87 /* EventsRepository.swift in Sources */,
 				F48D7E214076FB54837BA3F8 /* InteractiveMapView.swift in Sources */,
 				8991F35FB830C33D6315B0E8 /* KeychainSession.swift in Sources */,

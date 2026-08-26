@@ -28,6 +28,7 @@ struct Event: Codable, Identifiable, Equatable {
     /// calendar day's high/low (weatherTemperatureMin/Max), nil = no
     /// forecast cached yet (e.g. the event is too far out).
     let weatherIsHourly: Int?
+    let category: EventCategory
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -49,6 +50,7 @@ struct Event: Codable, Identifiable, Equatable {
         case weatherTemperatureMin = "weather_temperature_min"
         case weatherTemperatureMax = "weather_temperature_max"
         case weatherIsHourly = "weather_is_hourly"
+        case category
     }
 }
 
@@ -237,11 +239,13 @@ struct NewEventPayload: Codable {
     let endAt: String?
     let latitude: Double?
     let longitude: Double?
+    let category: String
 
     enum CodingKeys: String, CodingKey {
         case title, description, location
         case startAt = "start_at"
         case endAt = "end_at"
         case latitude, longitude
+        case category
     }
 }
