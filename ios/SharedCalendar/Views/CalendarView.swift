@@ -493,8 +493,11 @@ struct EventDetailView: View {
                 Section {
                     LabeledContent("Název") { CopyableValue(text: event.title, bold: true) }
                     LabeledContent("Kategorie") {
-                        Label(event.category.displayName, systemImage: event.category.icon)
-                            .foregroundStyle(event.category.color)
+                        HStack(spacing: 6) {
+                            Image(systemName: event.category.icon)
+                                .foregroundStyle(event.category.color)
+                            Text(event.category.displayName)
+                        }
                     }
                     if let description = event.description, !description.isEmpty {
                         LabeledContent("Popis", value: description)
@@ -505,7 +508,10 @@ struct EventDetailView: View {
                     }
                     if let acceptedCount = event.acceptedCount, acceptedCount > 0 {
                         LabeledContent("Zúčastní se") {
-                            Label("\(acceptedCount)", systemImage: "person.2.fill")
+                            HStack(spacing: 4) {
+                                Image(systemName: "person.2.fill")
+                                Text("\(acceptedCount)")
+                            }
                         }
                     }
                     if let location = event.location, !location.isEmpty {
