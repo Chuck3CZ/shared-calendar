@@ -23,6 +23,7 @@ struct CalendarView: View {
     @State private var showingSearch = false
     @State private var searchText = ""
     @State private var categoryFilter: EventCategory?
+    @State private var showingCategoryFilter = false
     @AppStorage("viewAsMember") private var viewAsMember = false
 
     private var events: [Event] { repository.events }
@@ -62,36 +63,50 @@ struct CalendarView: View {
 
     var body: some View {
         NavigationStack {
-            // The calendar grid used to sit in a plain VStack above the
-            // List, outside the List's own scroll view — pulling to
-            // refresh only moved the List's content, leaving the grid
-            // visually stuck in place instead of the whole screen reading
-            // as one block. Making it the List's own first row fixes that.
-            List {
-                MonthCalendarView(selectedDate: $selectedDate, displayedMonth: $displayedMonth, eventCategoriesByDay: eventCategoriesByDay)
-                    .padding(.vertical, 8)
-                    .listRowInsets(EdgeInsets())
-                    .listRowSeparator(.hidden)
+            // A plain ScrollView + VStack, not a List — List's iOS 26 row
+            // rendering fought us on every front here: it forced filter
+            // icons to a single system tint, occasionally swallowed taps on
+            // buttons that shared a row with other buttons, and overrode
+            // the month grid's own slide transition with its own implicit
+            // one. A ScrollView also makes pull-to-refresh move the whole
+            // screen as one block, calendar included, same as List did.
+            ScrollView {
+                VStack(spacing: 0) {
+                    MonthCalendarView(selectedDate: $selectedDate, displayedMonth: $displayedMonth, eventCategoriesByDay: eventCategoriesByDay)
+                        .padding(.vertical, 8)
 
-                if !searchText.isEmpty {
-                    if searchResults.isEmpty {
-                        Text("Nic nenalezeno").foregroundStyle(.secondary)
-                    } else {
-                        ForEach(searchResults) { event in
-                            EventRow(event: event, showDate: true) { detailEvent = event }
+                    Divider()
+
+                    if !searchText.isEmpty {
+                        if searchResults.isEmpty {
+                            Text("Nic nenalezeno")
+                                .foregroundStyle(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding()
+                        } else {
+                            ForEach(searchResults) { event in
+                                EventRow(event: event, showDate: true) { detailEvent = event }
+                                Divider()
+                            }
                         }
-                    }
-                } else if events.isEmpty, let errorMessage {
-                    Text(errorMessage).foregroundStyle(.red)
-                } else if eventsForSelectedDay.isEmpty {
-                    Text("Žádné akce tento den").foregroundStyle(.secondary)
-                } else {
-                    ForEach(eventsForSelectedDay) { event in
-                        EventRow(event: event, showDate: false) { detailEvent = event }
+                    } else if events.isEmpty, let errorMessage {
+                        Text(errorMessage)
+                            .foregroundStyle(.red)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                    } else if eventsForSelectedDay.isEmpty {
+                        Text("Žádné akce tento den")
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                    } else {
+                        ForEach(eventsForSelectedDay) { event in
+                            EventRow(event: event, showDate: false) { detailEvent = event }
+                            Divider()
+                        }
                     }
                 }
             }
-            .listStyle(.plain)
             .navigationTitle("Kalendář")
             .searchable(text: $searchText, isPresented: $showingSearch, prompt: "Hledat akce")
             .toolbar {
@@ -104,28 +119,8 @@ struct CalendarView: View {
                     .accessibilityLabel("Hledat akce")
                 }
                 ToolbarItem(placement: .topBarLeading) {
-                    Menu {
-                        Button {
-                            categoryFilter = nil
-                        } label: {
-                            if categoryFilter == nil {
-                                Label("Vše", systemImage: "checkmark")
-                            } else {
-                                Text("Vše")
-                            }
-                        }
-                        Divider()
-                        ForEach(EventCategory.allCases) { option in
-                            Button {
-                                categoryFilter = option
-                            } label: {
-                                if categoryFilter == option {
-                                    Label(option.displayName, systemImage: "checkmark")
-                                } else {
-                                    Label(option.displayName, systemImage: option.icon)
-                                }
-                            }
-                        }
+                    Button {
+                        showingCategoryFilter = true
                     } label: {
                         Image(systemName: categoryFilter == nil ? "line.3.horizontal.decrease.circle" : "line.3.horizontal.decrease.circle.fill")
                             .foregroundStyle(categoryFilter?.color ?? .primary)
@@ -160,6 +155,9 @@ struct CalendarView: View {
             }
             .sheet(isPresented: $showingNotifications) {
                 NotificationHistoryView()
+            }
+            .sheet(isPresented: $showingCategoryFilter) {
+                CategoryFilterSheet(selected: $categoryFilter)
             }
             .sheet(item: $editingEvent, onDismiss: {
                 Task { await load(forceRefresh: true) }
@@ -246,9 +244,62 @@ private struct EventRow: View {
                     .foregroundStyle(.secondary)
             }
             .contentShape(Rectangle())
+            .padding(.vertical, 10)
+            .padding(.horizontal)
         }
         .buttonStyle(.plain)
         .foregroundStyle(.primary)
+    }
+}
+
+/// A List used only for this short, static picker — List renders per-row
+/// icon colors just fine; it's specifically the native `Menu` (backed by
+/// UIMenu) that forces every item's icon to one system tint, which is why
+/// the toolbar filter button used to show colorless icons.
+private struct CategoryFilterSheet: View {
+    @Binding var selected: EventCategory?
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Button {
+                    selected = nil
+                    dismiss()
+                } label: {
+                    row(icon: "circle.dashed", iconColor: .secondary, title: "Vše", isSelected: selected == nil)
+                }
+                ForEach(EventCategory.allCases) { category in
+                    Button {
+                        selected = category
+                        dismiss()
+                    } label: {
+                        row(icon: category.icon, iconColor: category.color, title: category.displayName, isSelected: selected == category)
+                    }
+                }
+            }
+            .navigationTitle("Filtrovat podle kategorie")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Zavřít") { dismiss() }
+                }
+            }
+        }
+        .presentationDetents([.medium])
+    }
+
+    private func row(icon: String, iconColor: Color, title: String, isSelected: Bool) -> some View {
+        HStack {
+            Image(systemName: icon).foregroundStyle(iconColor)
+            Text(title)
+            Spacer()
+            if isSelected {
+                Image(systemName: "checkmark").foregroundStyle(.blue)
+            }
+        }
+        .foregroundStyle(.primary)
+        .contentShape(Rectangle())
     }
 }
 
@@ -308,6 +359,7 @@ private struct MonthCalendarView: View {
                 } label: {
                     Image(systemName: "chevron.left")
                 }
+                .buttonStyle(.plain)
                 Spacer()
                 Button {
                     pickerDate = displayedMonth
@@ -323,6 +375,7 @@ private struct MonthCalendarView: View {
                 } label: {
                     Image(systemName: "chevron.right")
                 }
+                .buttonStyle(.plain)
             }
 
             HStack(spacing: 0) {
@@ -387,39 +440,52 @@ private struct MonthCalendarView: View {
         }
     }
 
+    // Days outside the displayed month used to show as dimmed numbers, the
+    // same way UIKit's own calendar does it — but with a fixed 42-cell grid
+    // that's always at least a week of them, and testing showed people read
+    // the dim numbers as "this month, just faded" rather than "not this
+    // month", so those cells now render blank instead (still occupying
+    // their grid slot, just with nothing tappable in it).
     @ViewBuilder
     private func dayCell(for date: Date) -> some View {
-        let isInDisplayedMonth = calendar.isDate(date, equalTo: displayedMonth, toGranularity: .month)
-        let isSelected = calendar.isDate(date, inSameDayAs: selectedDate)
-        let isToday = calendar.isDateInToday(date)
+        if calendar.isDate(date, equalTo: displayedMonth, toGranularity: .month) {
+            let isSelected = calendar.isDate(date, inSameDayAs: selectedDate)
+            let isToday = calendar.isDateInToday(date)
 
-        Button {
-            selectedDate = date
-        } label: {
-            VStack(spacing: 4) {
-                Text("\(calendar.component(.day, from: date))")
-                    .font(.body)
-                    .fontWeight(isToday ? .bold : .regular)
-                    .frame(width: 32, height: 32)
-                    .foregroundStyle(isSelected ? Color.white : (isInDisplayedMonth ? Color.primary : Color.secondary.opacity(0.4)))
-                    .background {
-                        if isSelected {
-                            Circle().fill(Color.accentColor)
-                        } else if isToday {
-                            Circle().stroke(Color.accentColor, lineWidth: 1)
+            Button {
+                selectedDate = date
+            } label: {
+                VStack(spacing: 4) {
+                    Text("\(calendar.component(.day, from: date))")
+                        .font(.body)
+                        .fontWeight(isToday ? .bold : .regular)
+                        .frame(width: 32, height: 32)
+                        .foregroundStyle(isSelected ? Color.white : Color.primary)
+                        .background {
+                            if isSelected {
+                                Circle().fill(Color.accentColor)
+                            } else if isToday {
+                                Circle().stroke(Color.accentColor, lineWidth: 1)
+                            }
+                        }
+
+                    HStack(spacing: 3) {
+                        ForEach(categories(on: date).prefix(3)) { category in
+                            Circle().fill(category.color).frame(width: 5, height: 5)
                         }
                     }
-
-                HStack(spacing: 3) {
-                    ForEach(categories(on: date).prefix(3)) { category in
-                        Circle().fill(category.color).frame(width: 5, height: 5)
-                    }
+                    .frame(height: 5)
                 }
-                .frame(height: 5)
+                .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.plain)
+        } else {
+            VStack(spacing: 4) {
+                Color.clear.frame(width: 32, height: 32)
+                Color.clear.frame(height: 5)
             }
             .frame(maxWidth: .infinity)
         }
-        .buttonStyle(.plain)
     }
 
     private func changeMonth(by value: Int) {
