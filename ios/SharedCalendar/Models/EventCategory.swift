@@ -3,7 +3,7 @@ import SwiftUI
 /// Keep the raw values in sync with ALLOWED_CATEGORIES in the backend
 /// (backend/src/routes/events.js).
 enum EventCategory: String, Codable, CaseIterable, Identifiable {
-    case jidlo, zabava, kultura, nakupy, ostatni
+    case jidlo, zabava, kultura, konference, ostatni
 
     var id: String { rawValue }
 
@@ -12,7 +12,7 @@ enum EventCategory: String, Codable, CaseIterable, Identifiable {
         case .jidlo: return "Jídlo a pití"
         case .zabava: return "Zábava"
         case .kultura: return "Kultura"
-        case .nakupy: return "Nákupy"
+        case .konference: return "Konference a sraz"
         case .ostatni: return "Ostatní"
         }
     }
@@ -22,7 +22,7 @@ enum EventCategory: String, Codable, CaseIterable, Identifiable {
         case .jidlo: return "fork.knife"
         case .zabava: return "theatermasks.fill"
         case .kultura: return "building.columns.fill"
-        case .nakupy: return "cart.fill"
+        case .konference: return "person.3.fill"
         case .ostatni: return "calendar"
         }
     }
@@ -32,7 +32,7 @@ enum EventCategory: String, Codable, CaseIterable, Identifiable {
         case .jidlo: return .orange
         case .zabava: return .purple
         case .kultura: return .indigo
-        case .nakupy: return .green
+        case .konference: return .teal
         case .ostatni: return .gray
         }
     }
