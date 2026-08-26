@@ -62,31 +62,36 @@ struct CalendarView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
+            // The calendar grid used to sit in a plain VStack above the
+            // List, outside the List's own scroll view — pulling to
+            // refresh only moved the List's content, leaving the grid
+            // visually stuck in place instead of the whole screen reading
+            // as one block. Making it the List's own first row fixes that.
+            List {
                 MonthCalendarView(selectedDate: $selectedDate, displayedMonth: $displayedMonth, eventCategoriesByDay: eventCategoriesByDay)
                     .padding(.vertical, 8)
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
 
-                List {
-                    if !searchText.isEmpty {
-                        if searchResults.isEmpty {
-                            Text("Nic nenalezeno").foregroundStyle(.secondary)
-                        } else {
-                            ForEach(searchResults) { event in
-                                EventRow(event: event, showDate: true) { detailEvent = event }
-                            }
-                        }
-                    } else if events.isEmpty, let errorMessage {
-                        Text(errorMessage).foregroundStyle(.red)
-                    } else if eventsForSelectedDay.isEmpty {
-                        Text("Žádné akce tento den").foregroundStyle(.secondary)
+                if !searchText.isEmpty {
+                    if searchResults.isEmpty {
+                        Text("Nic nenalezeno").foregroundStyle(.secondary)
                     } else {
-                        ForEach(eventsForSelectedDay) { event in
-                            EventRow(event: event, showDate: false) { detailEvent = event }
+                        ForEach(searchResults) { event in
+                            EventRow(event: event, showDate: true) { detailEvent = event }
                         }
                     }
+                } else if events.isEmpty, let errorMessage {
+                    Text(errorMessage).foregroundStyle(.red)
+                } else if eventsForSelectedDay.isEmpty {
+                    Text("Žádné akce tento den").foregroundStyle(.secondary)
+                } else {
+                    ForEach(eventsForSelectedDay) { event in
+                        EventRow(event: event, showDate: false) { detailEvent = event }
+                    }
                 }
-                .listStyle(.plain)
             }
+            .listStyle(.plain)
             .navigationTitle("Kalendář")
             .searchable(text: $searchText, isPresented: $showingSearch, prompt: "Hledat akce")
             .toolbar {
@@ -538,7 +543,7 @@ struct EventDetailView: View {
                     }
                 } header: {
                     HStack {
-                        Text("Akci vytvořil")
+                        Text("Akci vytvořil:")
                         Spacer()
                         Text(isOwner ? "Ty" : (event.ownerName ?? "Neznámé jméno"))
                             .verifiedBadge(role: event.ownerRole)
