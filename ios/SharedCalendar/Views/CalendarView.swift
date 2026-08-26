@@ -290,10 +290,17 @@ private struct CategoryFilterSheet: View {
     }
 
     private func row(icon: String, iconColor: Color, title: String, isSelected: Bool) -> some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundStyle(iconColor)
-                .frame(width: 24, alignment: .center)
+        HStack(spacing: 12) {
+            // SF Symbols have wildly different intrinsic widths (three
+            // people vs. a fork) — centering each icon in its own fixed
+            // 28×28 slot, instead of just giving the Image a width, is what
+            // actually keeps every row's icon and text starting at the
+            // same x regardless of which symbol it is.
+            ZStack {
+                Image(systemName: icon)
+                    .foregroundStyle(iconColor)
+            }
+            .frame(width: 28, height: 28)
             Text(title)
             Spacer()
             if isSelected {
