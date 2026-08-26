@@ -107,7 +107,7 @@ struct CalendarView: View {
             .sheet(isPresented: $showingNewEvent, onDismiss: {
                 Task { await load(forceRefresh: true) }
             }) {
-                NewEventView()
+                NewEventView(initialDate: selectedDate)
             }
             .sheet(isPresented: $showingNotifications) {
                 NotificationHistoryView()

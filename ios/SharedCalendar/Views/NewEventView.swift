@@ -9,7 +9,7 @@ struct NewEventView: View {
     @State private var description = ""
     @State private var location = ""
     @State private var coordinate: CLLocationCoordinate2D?
-    @State private var startAt = Date()
+    @State private var startAt: Date
     @State private var hasEndTime = false
     @State private var endAt = Date()
     @State private var isSubmitting = false
@@ -19,6 +19,27 @@ struct NewEventView: View {
     @State private var showingLocationPicker = false
 
     private var isEditing: Bool { eventToEdit != nil }
+
+    /// `initialDate` is the day currently selected in the calendar (if any)
+    /// — used only when creating a new event, so "Kdy" opens already on the
+    /// day the user was looking at instead of always defaulting to today.
+    /// Keeps the current time-of-day, just swaps in that day.
+    init(eventToEdit: Event? = nil, initialDate: Date? = nil) {
+        self.eventToEdit = eventToEdit
+        if let initialDate {
+            let calendar = Calendar.current
+            let now = Date()
+            let combined = calendar.date(
+                bySettingHour: calendar.component(.hour, from: now),
+                minute: calendar.component(.minute, from: now),
+                second: 0,
+                of: initialDate
+            )
+            _startAt = State(initialValue: combined ?? initialDate)
+        } else {
+            _startAt = State(initialValue: Date())
+        }
+    }
 
     var body: some View {
         NavigationStack {
