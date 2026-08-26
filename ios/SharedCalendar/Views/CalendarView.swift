@@ -11,9 +11,9 @@ func openInMaps(latitude: Double, longitude: Double, name: String) {
 
 struct CalendarView: View {
     @ObservedObject private var auth = AuthManager.shared
+    @ObservedObject private var repository = EventsRepository.shared
     @State private var selectedDate = Date()
     @State private var displayedMonth = Date()
-    @State private var events: [Event] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var showingNewEvent = false
@@ -21,11 +21,8 @@ struct CalendarView: View {
     @State private var editingEvent: Event?
     @State private var detailEvent: Event?
     @AppStorage("viewAsMember") private var viewAsMember = false
-    // The window actually fetched — displayedMonth can wander anywhere via
-    // the month navigation arrows, well outside it, so it needs tracking to
-    // know when a refetch centered on the new month is actually due.
-    @State private var loadedFrom: Date?
-    @State private var loadedTo: Date?
+
+    private var events: [Event] { repository.events }
 
     private var eventsForSelectedDay: [Event] {
         events
@@ -44,7 +41,7 @@ struct CalendarView: View {
                     .padding(.vertical, 8)
 
                 List {
-                    if let errorMessage {
+                    if events.isEmpty, let errorMessage {
                         Text(errorMessage).foregroundStyle(.red)
                     } else if eventsForSelectedDay.isEmpty {
                         Text("Žádné akce tento den").foregroundStyle(.secondary)
@@ -108,7 +105,7 @@ struct CalendarView: View {
                 }
             }
             .sheet(isPresented: $showingNewEvent, onDismiss: {
-                Task { await load() }
+                Task { await load(forceRefresh: true) }
             }) {
                 NewEventView()
             }
@@ -116,7 +113,7 @@ struct CalendarView: View {
                 NotificationHistoryView()
             }
             .sheet(item: $editingEvent, onDismiss: {
-                Task { await load() }
+                Task { await load(forceRefresh: true) }
             }) { event in
                 NewEventView(eventToEdit: event)
             }
@@ -128,31 +125,31 @@ struct CalendarView: View {
                         editingEvent = event
                     },
                     onDeleted: {
-                        Task { await load() }
+                        Task { await load(forceRefresh: true) }
                     }
                 )
             }
             .task { await load() }
-            .refreshable { await load() }
+            .refreshable { await load(forceRefresh: true) }
             .onChange(of: displayedMonth) { _, newMonth in
-                guard let loadedFrom, let loadedTo, !(loadedFrom...loadedTo).contains(newMonth) else { return }
                 Task { await load(around: newMonth) }
             }
         }
     }
 
-    private func load(around referenceDate: Date = Date()) async {
+    /// Reuses the cached snapshot in EventsRepository whenever it already
+    /// covers this range and hasn't crossed a noon/midnight checkpoint since
+    /// its last fetch — see EventsRepository for why that avoids re-hitting
+    /// the server on every app open or tab switch.
+    private func load(around referenceDate: Date = Date(), forceRefresh: Bool = false) async {
         isLoading = true
         defer { isLoading = false }
         do {
             let calendar = Calendar.current
             let from = calendar.date(byAdding: .month, value: -1, to: referenceDate) ?? referenceDate
             let to = calendar.date(byAdding: .month, value: 3, to: referenceDate) ?? referenceDate
-            events = try await APIClient.shared.fetchEvents(from: from, to: to)
-            loadedFrom = from
-            loadedTo = to
+            try await repository.ensureLoaded(from: from, to: to, forceRefresh: forceRefresh)
             errorMessage = nil
-            WidgetDataStore.update(from: events)
         } catch {
             guard !error.isCancellation else { return }
             errorMessage = "Nepodařilo se načíst akce: \(error.localizedDescription)"

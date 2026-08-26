@@ -36,6 +36,7 @@
 		96C4F40DBE6FAEF4628D33A2 /* WeatherConditionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = F237393C54FBC5EAA6CD8574 /* WeatherConditionInfo.swift */; };
 		A11CEC435F2BCF3FE75E1E54 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = E9FFE5A513BCD2E5F5B8FB83 /* PrivacyInfo.xcprivacy */; };
 		A2C7490A2949CEA90C6160EE /* DeleteAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C674073D4FE16CB1915F672 /* DeleteAccountView.swift */; };
+		A49B96D105C10E9AA2F4FF87 /* EventsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91469EBFCC11AACB4A3654A7 /* EventsRepository.swift */; };
 		A665AC250102620252CEB632 /* ShakeDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2540FDFEC2B78D08113E1EF7 /* ShakeDetector.swift */; };
 		A810425834DA17BAB893E65F /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA24C6C582D3AB311CEB227 /* Event.swift */; };
 		B54C73D25A1ABC5F1CA301E1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 700397C71B485377CD667FEB /* Assets.xcassets */; };
@@ -101,6 +102,7 @@
 		756AFB570AF9DE2AD695E6BC /* AdminEventReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminEventReportsView.swift; sourceTree = "<group>"; };
 		865FEF11E6E8D6433369CF60 /* SignInNonce.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInNonce.swift; sourceTree = "<group>"; };
 		90D0A053CCC02AEE4770E2CC /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		91469EBFCC11AACB4A3654A7 /* EventsRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsRepository.swift; sourceTree = "<group>"; };
 		92783EC1CEE72B6A13D18EBE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		97685D8A58BD608CB9604DBD /* SharedCalendarWidgetExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = SharedCalendarWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		9907B5FDD9F5BB072AA56D2A /* SharedCalendarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCalendarApp.swift; sourceTree = "<group>"; };
@@ -228,6 +230,7 @@
 				6B9A70E0AE36C2EE3ECA676B /* APIClient.swift */,
 				B203EF495E74B7A751A0E592 /* AuthManager.swift */,
 				C2E5BF975131F6C2313DFAFA /* DeepLinkRouter.swift */,
+				91469EBFCC11AACB4A3654A7 /* EventsRepository.swift */,
 				9FEEA6E4E83F1460F4581A23 /* KeychainSession.swift */,
 				728844D0DDF6D92C842146AE /* PushTokenStore.swift */,
 				2873AC5C152E5C24E34F465D /* ServerDate.swift */,
@@ -427,6 +430,7 @@
 				3C93DEE52589F720B4B165A9 /* DeepLinkRouter.swift in Sources */,
 				A2C7490A2949CEA90C6160EE /* DeleteAccountView.swift in Sources */,
 				A810425834DA17BAB893E65F /* Event.swift in Sources */,
+				A49B96D105C10E9AA2F4FF87 /* EventsRepository.swift in Sources */,
 				F48D7E214076FB54837BA3F8 /* InteractiveMapView.swift in Sources */,
 				8991F35FB830C33D6315B0E8 /* KeychainSession.swift in Sources */,
 				2B721A0DB90FB11444E14E49 /* LocationPickerView.swift in Sources */,

@@ -4,11 +4,13 @@ import SwiftUI
 /// day. A day with nothing on it still gets a section, with a greyed
 /// "Žádná akce" placeholder, so the empty days are visible too.
 struct UpcomingView: View {
-    @State private var events: [Event] = []
+    @ObservedObject private var repository = EventsRepository.shared
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var detailEvent: Event?
     @State private var editingEvent: Event?
+
+    private var events: [Event] { repository.events }
 
     private static let horizonDays = 7
 
@@ -76,7 +78,7 @@ struct UpcomingView: View {
                 }
             }
             .navigationTitle("Následuje")
-            .refreshable { await load() }
+            .refreshable { await load(forceRefresh: true) }
             .task { await load() }
             .sheet(item: $detailEvent) { event in
                 EventDetailView(
@@ -86,26 +88,28 @@ struct UpcomingView: View {
                         editingEvent = event
                     },
                     onDeleted: {
-                        Task { await load() }
+                        Task { await load(forceRefresh: true) }
                     }
                 )
             }
             .sheet(item: $editingEvent, onDismiss: {
-                Task { await load() }
+                Task { await load(forceRefresh: true) }
             }) { event in
                 NewEventView(eventToEdit: event)
             }
         }
     }
 
-    private func load() async {
+    /// See EventsRepository — shares its cache with CalendarView so this
+    /// tab doesn't trigger its own network fetch on every open.
+    private func load(forceRefresh: Bool = false) async {
         isLoading = true
         defer { isLoading = false }
         do {
             let calendar = Calendar.current
             let from = calendar.startOfDay(for: Date())
             let to = calendar.date(byAdding: .day, value: Self.horizonDays, to: from) ?? from
-            events = try await APIClient.shared.fetchEvents(from: from, to: to)
+            try await repository.ensureLoaded(from: from, to: to, forceRefresh: forceRefresh)
             errorMessage = nil
         } catch {
             guard !error.isCancellation else { return }
