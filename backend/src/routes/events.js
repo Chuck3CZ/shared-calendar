@@ -7,8 +7,8 @@ import { refreshWeatherForEvent } from "../weather.js";
 
 export const eventsRouter = Router();
 
-// Keep in sync with EventCategory in the iOS app (Models/Event.swift).
-const ALLOWED_CATEGORIES = ["rodina", "prace", "sport", "oslava", "cestovani", "ostatni"];
+// Keep in sync with EventCategory in the iOS app (Models/EventCategory.swift).
+const ALLOWED_CATEGORIES = ["jidlo", "zabava", "kultura", "nakupy", "ostatni"];
 const DEFAULT_CATEGORY = "ostatni";
 
 const listEvents = db.prepare(`
