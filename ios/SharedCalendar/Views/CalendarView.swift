@@ -537,8 +537,12 @@ struct EventDetailView: View {
                         }
                     }
                 } header: {
-                    Text(isOwner ? "Akci vytvořil: Ty" : "Akci vytvořil: \(event.ownerName ?? "Neznámé jméno")")
-                        .verifiedBadge(role: event.ownerRole)
+                    HStack {
+                        Text("Akci vytvořil")
+                        Spacer()
+                        Text(isOwner ? "Ty" : (event.ownerName ?? "Neznámé jméno"))
+                            .verifiedBadge(role: event.ownerRole)
+                    }
                 }
 
                 if isAttending {
