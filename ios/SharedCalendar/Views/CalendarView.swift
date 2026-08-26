@@ -291,7 +291,9 @@ private struct CategoryFilterSheet: View {
 
     private func row(icon: String, iconColor: Color, title: String, isSelected: Bool) -> some View {
         HStack {
-            Image(systemName: icon).foregroundStyle(iconColor)
+            Image(systemName: icon)
+                .foregroundStyle(iconColor)
+                .frame(width: 24, alignment: .center)
             Text(title)
             Spacer()
             if isSelected {
@@ -369,6 +371,13 @@ private struct MonthCalendarView: View {
                         .font(.headline)
                 }
                 .buttonStyle(.plain)
+                .id(displayedMonth)
+                .transition(.asymmetric(
+                    insertion: .move(edge: incomingEdge),
+                    removal: .move(edge: incomingEdge == .trailing ? .leading : .trailing)
+                ))
+                .frame(maxWidth: .infinity)
+                .clipped()
                 Spacer()
                 Button {
                     changeMonth(by: 1)
