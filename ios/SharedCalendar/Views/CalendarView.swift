@@ -140,45 +140,23 @@ struct CalendarView: View {
                     }
                     .accessibilityLabel("Filtrovat podle kategorie")
                 }
-                if auth.isSignedIn && !viewAsMember && horizontalSizeClass == .regular {
-                    // Regular width already crowds the trailing side with
-                    // the searchable field, so bell + plus share one slot:
-                    // tapping creates an event (the common case), the
-                    // chevron/long-press reveals notifications.
+                if auth.isSignedIn {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Menu {
-                            Button {
-                                showingNotifications = true
-                            } label: {
-                                Label("Historie notifikací", systemImage: "bell")
-                            }
+                        Button {
+                            showingNotifications = true
+                        } label: {
+                            Image(systemName: "bell")
+                        }
+                        .accessibilityLabel("Historie notifikací")
+                    }
+                }
+                if auth.isSignedIn && !viewAsMember {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            showingNewEvent = true
                         } label: {
                             Image(systemName: "plus.circle.fill")
                                 .font(.title2)
-                        } primaryAction: {
-                            showingNewEvent = true
-                        }
-                        .accessibilityLabel("Nová akce")
-                    }
-                } else {
-                    if auth.isSignedIn {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            Button {
-                                showingNotifications = true
-                            } label: {
-                                Image(systemName: "bell")
-                            }
-                            .accessibilityLabel("Historie notifikací")
-                        }
-                    }
-                    if auth.isSignedIn && !viewAsMember {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            Button {
-                                showingNewEvent = true
-                            } label: {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.title2)
-                            }
                         }
                     }
                 }
