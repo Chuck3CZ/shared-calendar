@@ -106,6 +106,11 @@ struct CalendarView: View {
                         }
                     }
                 }
+                // Caps the month grid and day list to a readable column on
+                // iPad/wide windows instead of stretching cells and rows
+                // edge to edge; on iPhone widths this cap never engages.
+                .frame(maxWidth: 700)
+                .frame(maxWidth: .infinity)
             }
             .navigationTitle("Kalendář")
             .searchable(text: $searchText, isPresented: $showingSearch, prompt: "Hledat akce")

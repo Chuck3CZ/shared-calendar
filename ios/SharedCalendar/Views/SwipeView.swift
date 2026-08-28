@@ -25,39 +25,45 @@ struct SwipeView: View {
 
     private var content: some View {
         ScrollView {
-            if viewAsMember {
-                Text("Testovací režim člena – swipnutí se nikam neukládá")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.top, 4)
-            }
-            if isShowingReviewBanner {
-                Text("Znovu procházíš všechny akce – nové rozhodnutí přepíše to staré")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.top, 4)
-            }
-            ZStack {
-                if let errorMessage {
-                    Text(errorMessage).foregroundStyle(.red).padding()
-                } else if pending.isEmpty {
-                    ContentUnavailableView(
-                        "Žádné nové akce",
-                        systemImage: "checkmark.circle",
-                        description: Text("Všechno máš probrané")
-                    )
-                } else {
-                    ForEach(Array(pending.enumerated().reversed()), id: \.element.id) { index, event in
-                        SwipeCard(event: event) { status in
-                            respond(to: event, status: status)
+            VStack(spacing: 0) {
+                if viewAsMember {
+                    Text("Testovací režim člena – swipnutí se nikam neukládá")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 4)
+                }
+                if isShowingReviewBanner {
+                    Text("Znovu procházíš všechny akce – nové rozhodnutí přepíše to staré")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 4)
+                }
+                ZStack {
+                    if let errorMessage {
+                        Text(errorMessage).foregroundStyle(.red).padding()
+                    } else if pending.isEmpty {
+                        ContentUnavailableView(
+                            "Žádné nové akce",
+                            systemImage: "checkmark.circle",
+                            description: Text("Všechno máš probrané")
+                        )
+                    } else {
+                        ForEach(Array(pending.enumerated().reversed()), id: \.element.id) { index, event in
+                            SwipeCard(event: event) { status in
+                                respond(to: event, status: status)
+                            }
+                            .zIndex(Double(index))
+                            .allowsHitTesting(index == pending.count - 1)
                         }
-                        .zIndex(Double(index))
-                        .allowsHitTesting(index == pending.count - 1)
                     }
                 }
+                .padding()
+                .frame(height: 480)
             }
-            .padding()
-            .frame(height: 480)
+            // Keeps the card at a sane, roughly phone-sized width on iPad
+            // instead of stretching it wide and squat across the window.
+            .frame(maxWidth: 480)
+            .frame(maxWidth: .infinity)
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
