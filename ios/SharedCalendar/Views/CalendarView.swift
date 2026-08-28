@@ -25,6 +25,7 @@ struct CalendarView: View {
     @State private var categoryFilter: EventCategory?
     @State private var showingCategoryFilter = false
     @AppStorage("viewAsMember") private var viewAsMember = false
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     private var events: [Event] { repository.events }
 
@@ -115,13 +116,20 @@ struct CalendarView: View {
             .navigationTitle("Kalendář")
             .searchable(text: $searchText, isPresented: $showingSearch, prompt: "Hledat akce")
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        showingSearch = true
-                    } label: {
-                        Image(systemName: "magnifyingglass")
+                // On regular width (iPad/Mac), `.searchable` below always
+                // shows its own field in the toolbar — this button would
+                // just toggle a state nothing reacts to, so it only makes
+                // sense on compact width (iPhone), where the field is a
+                // separate row that isPresented actually shows/hides.
+                if horizontalSizeClass == .compact {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            showingSearch = true
+                        } label: {
+                            Image(systemName: "magnifyingglass")
+                        }
+                        .accessibilityLabel("Hledat akce")
                     }
-                    .accessibilityLabel("Hledat akce")
                 }
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
@@ -132,23 +140,45 @@ struct CalendarView: View {
                     }
                     .accessibilityLabel("Filtrovat podle kategorie")
                 }
-                if auth.isSignedIn {
+                if auth.isSignedIn && !viewAsMember && horizontalSizeClass == .regular {
+                    // Regular width already crowds the trailing side with
+                    // the searchable field, so bell + plus share one slot:
+                    // tapping creates an event (the common case), the
+                    // chevron/long-press reveals notifications.
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            showingNotifications = true
-                        } label: {
-                            Image(systemName: "bell")
-                        }
-                        .accessibilityLabel("Historie notifikací")
-                    }
-                }
-                if auth.isSignedIn && !viewAsMember {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            showingNewEvent = true
+                        Menu {
+                            Button {
+                                showingNotifications = true
+                            } label: {
+                                Label("Historie notifikací", systemImage: "bell")
+                            }
                         } label: {
                             Image(systemName: "plus.circle.fill")
                                 .font(.title2)
+                        } primaryAction: {
+                            showingNewEvent = true
+                        }
+                        .accessibilityLabel("Nová akce")
+                    }
+                } else {
+                    if auth.isSignedIn {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button {
+                                showingNotifications = true
+                            } label: {
+                                Image(systemName: "bell")
+                            }
+                            .accessibilityLabel("Historie notifikací")
+                        }
+                    }
+                    if auth.isSignedIn && !viewAsMember {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button {
+                                showingNewEvent = true
+                            } label: {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.title2)
+                            }
                         }
                     }
                 }
